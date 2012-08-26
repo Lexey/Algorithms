@@ -1,0 +1,6 @@
+_ReSharper.*/
+DisjointSets.v11.suo
+DisjointSets/bin/*
+DisjointSets/obj/*
+Tests/bin/*
+Tests/obj/*

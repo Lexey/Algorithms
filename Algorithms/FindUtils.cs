@@ -7,7 +7,7 @@ namespace Algorithms
     public static class FindUtils
 	{
 		/// <summary>
-        /// Возвращает наименьшую позицию i в списке, такую, что для всех j из диапазона [0, i) верно list[j] &lt; val
+        /// Возвращает наименьшую позицию i из [0, end] в списке, такую, что list[i] >= val
         /// </summary>
         /// <typeparam name="T">Тип элемента. Должен реализовывать IComparable&lt;T&gt; или IComparable</typeparam>
         /// <param name="list">Отсортированный по возрастанию список элементов</param>
@@ -19,7 +19,7 @@ namespace Algorithms
         }
 
 		/// <summary>
-		/// Возвращает наименьшую позицию i в списке, такую, что для всех j из диапазона [from, i) верно list[j] &lt; val
+        /// Возвращает наименьшую позицию i из [from, end] в списке, такую, что list[i] >= val
 		/// </summary>
 		/// <typeparam name="T">Тип элемента. Должен реализовывать IComparable&lt;T&gt; или IComparable</typeparam>
 		/// <param name="list">Отсортированный по возрастанию список элементов</param>
@@ -32,7 +32,7 @@ namespace Algorithms
 		}
 
 		/// <summary>
-        /// Возвращает наименьшую позицию i в списке, такую, что для всех j из диапазона [0, i) верно list[j] &lt; val
+        /// Возвращает наименьшую позицию i из [0, end] в списке, такую, что list[i] >= val
         /// </summary>
         /// <typeparam name="T">Тип элемента</typeparam>
         /// <typeparam name="U">Тип значения для поиска</typeparam>
@@ -46,7 +46,7 @@ namespace Algorithms
         }
 
         /// <summary>
-        /// Возвращает наименьшую позицию i в списке, такую, что для всех j из диапазона [from, i) верно list[j] &lt; val
+        /// Возвращает наименьшую позицию i из [from, to] в списке, такую, что list[i] >= val
         /// </summary>
         /// <typeparam name="T">Тип элемента</typeparam>
         /// <typeparam name="U">Тип значения для поиска</typeparam>
@@ -93,7 +93,7 @@ namespace Algorithms
         }
 
         /// <summary>
-        /// Возвращает наибольшую позицию i в списке, такую, что для всех j из диапазона [0, i) верно list[j] &lt; val
+        /// Возвращает наименьшую позицию i из [0, end] в списке, такую, что list[i] > val
         /// </summary>
         /// <typeparam name="T">Тип элемента. Должен реализовывать IComparable&lt;T&gt; или IComparable</typeparam>
         /// <param name="list">Отсортированный по возрастанию список элементов</param>
@@ -105,7 +105,7 @@ namespace Algorithms
         }
 
         /// <summary>
-        /// Возвращает наибольшую позицию i в списке, такую, что для всех j из диапазона [0, i) верно list[j] &lt; val
+        /// Возвращает наименьшую позицию i из [0, end] в списке, такую, что list[i] > val
         /// </summary>
         /// <typeparam name="T">Тип элемента</typeparam>
         /// <typeparam name="U">Тип значения для поиска</typeparam>
@@ -119,7 +119,7 @@ namespace Algorithms
         }
 
         /// <summary>
-        /// Возвращает наибольшую позицию i в списке, такую, что для всех j из диапазона [from, i) верно list[j] &lt; val
+        /// Возвращает наименьшую позицию i из [from, to] в списке, такую, что list[i] > val
         /// </summary>
         /// <typeparam name="T">Тип элемента</typeparam>
         /// <typeparam name="U">Тип значения для поиска</typeparam>

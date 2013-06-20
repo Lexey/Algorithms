@@ -4,3 +4,8 @@ DisjointSets/bin/*
 DisjointSets/obj/*
 Tests/bin/*
 Tests/obj/*
+*.user
+*.suo
+*/bin/*
+*/obj/*
+packages/NUnit.2.6.2/*

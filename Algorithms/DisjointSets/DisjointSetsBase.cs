@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Structures
+namespace Algorithms.DisjointSets
 {
     /// <summary>Базовый класс для реализации Disjoint sets</summary>
     ///  <remarks>
@@ -9,21 +9,22 @@ namespace Structures
     public class DisjointSetsBase
     {
         /// <summary>Список всех узлов</summary>
-        protected readonly List<BasicNode> Nodes = new List<BasicNode>();
+        protected readonly List<BasicNode> Nodes_ = new List<BasicNode>();
 
         /// <summary>Создает пустой DS</summary>
-        protected DisjointSetsBase() {}
+        protected DisjointSetsBase() { }
 
         /// <summary>Число элементов</summary>
         public int Count
         {
-            get { return Nodes.Count; }
+            get { return Nodes_.Count; }
         }
 
         /// <summary>Число несвязанных множеств</summary>
         public int SetCount
         {
-            get; protected set;
+            get;
+            protected set;
         }
 
         /// <summary>Поиск идентификатора множества, которому принадлежит элемент по заданному индексу</summary>
@@ -34,9 +35,9 @@ namespace Structures
         {
             // сначала ищем индекс корневого элемента дерева, к которому принадлежит наш узел
             var rootIndex = index;
-            for (;;)
+            for (; ; )
             {
-                var parentIndex = Nodes[rootIndex].ParentIndex;
+                var parentIndex = Nodes_[rootIndex].ParentIndex;
                 if (parentIndex == -1)
                 {
                     break;
@@ -47,7 +48,7 @@ namespace Structures
             // компрессия пути - идем от нашего элемента вверх к корню, обновляя ParentIndex на rootIndex
             while (index != rootIndex)
             {
-                var node = Nodes[index];
+                var node = Nodes_[index];
                 index = node.ParentIndex;
                 node.ParentIndex = rootIndex;
             }
@@ -66,8 +67,8 @@ namespace Structures
                 return; // уже одно множество
             }
 
-            var set1Root = Nodes[elementOfSet1];
-            var set2Root = Nodes[elementOfSet2];
+            var set1Root = Nodes_[elementOfSet1];
+            var set2Root = Nodes_[elementOfSet2];
             var rankDifference = set1Root.Rank - set2Root.Rank;
             // Цепляем дерево с меньшим рангом к корню дерева с большим. В этом случае ранг получившегося дерева равен большему, кроме случая, когда ранги равны (тогда будет +1)
             if (rankDifference > 0) // у 1-го ранг больше

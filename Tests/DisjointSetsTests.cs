@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Algorithms.DisjointSets;
 using NUnit.Framework;
-using Structures;
 
 namespace Tests
 {
     [TestFixture]
-    public class Tests
+    public class DisjointSetsTests
     {
         private readonly Random random_ = new Random();
         private const int ElementsNumber_ = 10000;

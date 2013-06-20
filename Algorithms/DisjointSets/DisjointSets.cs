@@ -1,4 +1,4 @@
-﻿namespace Structures
+﻿namespace Algorithms.DisjointSets
 {
     /// <summary>Реализация классической структуры Disjoint sets</summary>
     ///  <remarks>
@@ -7,7 +7,7 @@
     public sealed class DisjointSets : DisjointSetsBase
     {
         /// <summary>Создает пустой DS</summary>
-        public DisjointSets() {}
+        public DisjointSets() { }
 
         /// <summary>Создает DS с заданным количеством элементов</summary>
         /// <param name="count">Количество элементов</param>
@@ -22,7 +22,7 @@
         {
             for (var i = 0; i < count; ++i)
             {
-                Nodes.Add(new BasicNode { ParentIndex = -1, Rank = 0 });
+                Nodes_.Add(new BasicNode { ParentIndex = -1, Rank = 0 });
             }
             SetCount += count;
         }

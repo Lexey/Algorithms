@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C16F3CE2-81C4-4B90-98F0-E33389B74376}</ProjectGuid>
+    <ProjectGuid>{5AFE0D96-8E9A-4923-801B-F08D3B11BD18}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Structures</RootNamespace>
-    <AssemblyName>DisjointSets</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <RootNamespace>Algorithms</RootNamespace>
+    <AssemblyName>algorithms</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,9 +39,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DisjointSets.cs" />
-    <Compile Include="DisjointSetsBase.cs" />
-    <Compile Include="DisjointSetsT.cs" />
+    <Compile Include="DisjointSets\DisjointSets.cs" />
+    <Compile Include="DisjointSets\DisjointSetsBase.cs" />
+    <Compile Include="DisjointSets\DisjointSetsT.cs" />
+    <Compile Include="FindUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

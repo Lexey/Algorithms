@@ -45,28 +45,32 @@ namespace Algorithms.Annealing
                     Logger.TraceFormat("New value {0} (old {1}). Doing shift", value, Value);
                     Solution = point;
                     Value = value;
-                    continue;
                 }
-                var p = 0d;
-                if (t > 0)
+                else
                 {
-                    p = Math.Exp(-valueDelta / t);
-                }
-                if (p <= double.Epsilon)
-                {
-                    Logger.Trace("Probabilty is too low. Point is fixed");
-                    continue;
+                    var p = 0d;
+                    if (t > 0)
+                    {
+                        p = Math.Exp(-valueDelta / t);
+                    }
+                    if (p <= double.Epsilon)
+                    {
+                        Logger.Trace("Probabilty is too low. Point is fixed");
                         // сдвинуться в точку с большим значением уже нельзя, но есть еще шанс перепрыгнуть случайно в лучшее значение
+                    }
+                    else
+                    {
+                        var doShift = Random.NextDouble() <= p;
+                        Logger.Trace(f => f("Probabilty is {0}. {1} shift. New value {2} (old {3})"
+                                            , p, doShift ? "Doing" : "Not doing", value, Value));
+                        if (doShift)
+                        {
+                            Solution = point;
+                            Value = value;
+                        }
+                    }
                 }
-                var doShift = Random.NextDouble() <= p;
-                Logger.Trace(f => f("Probabilty is {0}. {1} shift. New value {2} (old {3})"
-                                    , p, doShift ? "Doing" : "Not doing", value, Value));
-                if (doShift)
-                {
-                    Solution = point;
-                    Value = value;
-                }
-                if (CurrentIteration % 1000 == 0)
+                if (CurrentIteration % 5000 == 0)
                 {
                     Logger.DebugFormat("Done {0} iterations. Current value = {1}, t = {2}"
                                        , CurrentIteration, Value, t);

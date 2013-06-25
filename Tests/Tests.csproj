@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Annealing\AnnealingTests.cs" />
+    <Compile Include="Annealing\QueensAnnealing.cs" />
     <Compile Include="DisjointSetsTests.cs" />
     <Compile Include="FindUtilsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

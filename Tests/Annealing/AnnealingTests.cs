@@ -15,7 +15,7 @@ namespace Tests.Annealing
                 Console.WriteLine("Calculating queens for size {0}", n);
                 var a = new QueensAnnealing(n);
                 Assert.IsTrue(a.Solve());
-                ValidateSolution(n, a.Solution.Board);
+                ValidateSolution(n, a.CurrentPoint.Board);
                 n *= 2;
             }
         }

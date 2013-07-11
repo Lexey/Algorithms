@@ -19,14 +19,21 @@ namespace Algorithms.Annealing
         }
 
         /// <summary>Текущая точка</summary>
-        public T Solution { get; protected set; }
+        public T CurrentPoint { get; protected set; }
         /// <summary>Текущее значение целевой функции</summary>
         public double Value { get; protected set; }
+        /// <summary>Лучшая точка</summary>
+        public T BestPoint { get; private set; }
+        /// <summary>Лучшее значение целевой функции</summary>
+        public double BestValue { get; private set; }
+
         /// <summary>Ищет оптимум целевой функции</summary>
         /// <returns>true, если достигнут оптимум; иначе false</returns>
         public virtual bool Solve()
         {
             CurrentIteration = 0;
+            BestPoint = CurrentPoint;
+            BestValue = Value;
             if (Value <= OptimalValue)
             {
                 Logger.Debug("Initial value is already optimal");
@@ -43,8 +50,10 @@ namespace Algorithms.Annealing
                 if (valueDelta <= 0)
                 {
                     Logger.TraceFormat("New value {0} (old {1}). Doing shift", value, Value);
-                    Solution = point;
+                    CurrentPoint = point;
                     Value = value;
+                    BestPoint = point;
+                    BestValue = value;
                 }
                 else
                 {
@@ -65,7 +74,7 @@ namespace Algorithms.Annealing
                                             , p, doShift ? "Doing" : "Not doing", value, Value));
                         if (doShift)
                         {
-                            Solution = point;
+                            CurrentPoint = point;
                             Value = value;
                         }
                     }

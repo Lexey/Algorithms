@@ -14,7 +14,7 @@ namespace Tests.Annealing
             {
                 throw new ArgumentException("Size should be greater than 3", "size");
             }
-            Solution = new Point(size);
+            CurrentPoint = new Point(size);
             StartTemperature = 5;
             Alpha = 0.995;
             IterationsPerTemperatureStep = (uint)Math.Max(100, size / 50);
@@ -23,7 +23,7 @@ namespace Tests.Annealing
 
         public override bool Solve()
         {
-            Value = Solution.Value;
+            Value = CurrentPoint.Value;
  	        return base.Solve();
         }
 
@@ -31,14 +31,14 @@ namespace Tests.Annealing
         {
             // перестановка двух случайных столбцов
             // первый из которых должен иметь ненулевое число коллизий
-            var size = Solution.Board.Length;
+            var size = CurrentPoint.Board.Length;
             ushort i;
             do
             {
                 i = (ushort)Random.Next(0, size);
-            } while (!Solution.HasCollisions(i));
+            } while (!CurrentPoint.HasCollisions(i));
             var j = (ushort)((i + Random.Next(0, size - 1)) % size);
-            var p = new Point(Solution);
+            var p = new Point(CurrentPoint);
             p.SwapColumns(i, j);
             return p;
         }

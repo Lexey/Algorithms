@@ -33,6 +33,9 @@ namespace Algorithms
 		{
 			get { return Columns; }
 		}
+
+        /// <summary>Массив значений</summary>
+        public double[] Values { get { return base[0]; } }
 	}
 
 	/// <summary>Матрица M x N</summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Common.Logging;
 
 namespace Algorithms.LinearProgramming
 {
@@ -62,8 +63,9 @@ namespace Algorithms.LinearProgramming
 					// здесь у нас остались только базисные ограничения (или избыток мал (<3))
 					// просто решаем задачу симлекс-методом
 					// добавляем вспомогательные переменные, чтобы превратить неравенства в равенства
-					var eq = BuildSimplexProblem(currentState_);
-					Vector x1;
+                    var eq = BuildSimplexProblem(currentState_);
+                    Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Rows, eq.A.Columns);
+                    Vector x1;
 					var result = eq.Solv(out x1, out value);
 					if (result != SimplexResult.Success)
 					{
@@ -84,6 +86,7 @@ namespace Algorithms.LinearProgramming
 							rows = currentState_.Rows;
 							columns = currentState_.Columns;
 							eq = BuildSimplexProblem(currentState_);
+                            Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Rows, eq.A.Columns);
 							result = eq.Solv(out x1, out value);
 						}
 						if (result != SimplexResult.Success)
@@ -389,8 +392,11 @@ namespace Algorithms.LinearProgramming
 		LazyState currentState_ = new LazyState();
 		/// <summary>Стек состояний</summary>
 		Stack<State> states_;
-#endregion поля
-    }
+
+	    private static ILog Log_ = LogManager.GetCurrentClassLogger();
+
+	    #endregion поля
+	}
 
 #region States
     internal class LazyState

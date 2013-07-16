@@ -51,7 +51,7 @@
     <Compile Include="FindUtils.cs" />
     <Compile Include="Annealing\AnnealingPowerSeries.cs" />
     <Compile Include="LinearProgramming\SeideAlgorithm.cs" />
-    <Compile Include="LinearProgramming\Simplex.cs" />
+    <Compile Include="LinearProgramming\SimplexProblem.cs" />
     <Compile Include="LinearProgramming\SimplexFeasibilityProblem.cs" />
     <Compile Include="LinearProgramming\SimplexResult.cs" />
     <Compile Include="Matrix.cs" />

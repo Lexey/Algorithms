@@ -28,7 +28,18 @@ namespace Algorithms.LinearProgramming
         /// <returns>Результат работы симплекс-метода</returns>
         public SimplexResult Solv(out int[] basisIndices)
         {
+            Vector x;
+            return Solv(out basisIndices, out x);
+        }
+
+        /// <summary>Находит стартовый базис для задачи</summary>
+        /// <param name="basisIndices">Индексы базисных переменных</param>
+        /// <param name="x">Значения переменных</param>
+        /// <returns>Результат работы симплекс-метода</returns>
+        public SimplexResult Solv(out int[] basisIndices, out Vector x)
+        {
             basisIndices = null;
+            x = null;
             // решаем задачу Ax +- y = b, (-K, y) -> max, x >= 0, y >= 0. Если исходная задача имеет решение,
             // то и данная имеет решение, причем ее решение дает точку, удовлетворяющую системе Ax=b и y = 0
             // если в правой части есть отрицательное число, то соответствующую доп. переменную нужно добавить со знаком минус
@@ -60,9 +71,8 @@ namespace Algorithms.LinearProgramming
                 {
                     c1[i + columnsNumber] = K;
                 }
-                Vector x1;
                 double value;
-                result = eq.Solv(startIndicies, out x1, out value, out basisIndices);
+                result = eq.Solv(startIndicies, out x, out value, out basisIndices);
                 if (result != SimplexResult.FunctionalUnbound)
                 {
                     break;

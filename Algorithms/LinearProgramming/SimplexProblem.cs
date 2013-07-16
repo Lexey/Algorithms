@@ -40,25 +40,25 @@ namespace Algorithms.LinearProgramming
 
 
 		/// <summary>Решает задачу ЛП симплекс-методом</summary>
-		/// <param name="startIndices">Индексы базисных переменных стартовой точки</param>
+		/// <param name="startBasis">Индексы базисных переменных стартовой точки</param>
 		/// <param name="x">Конечная точка</param>
 		/// <param name="value">Конечное значение функционала</param>
 		/// <returns>Результат вычислений</returns>
-		public SimplexResult Solv(int[] startIndices, out Vector x, out double value)
+		public SimplexResult Solv(int[] startBasis, out Vector x, out double value)
 		{
 			int[] tmp;
-			return Solv(startIndices, out x, out value, out tmp);
+			return Solv(startBasis, out x, out value, out tmp);
 		}
 
 		/// <summary>Решает задачу ЛП симплекс-методом</summary>
-		/// <param name="startIndices">Индексы базосных переменных стартовой точки</param>
+		/// <param name="startBasis">Индексы базосных переменных стартовой точки</param>
 		/// <param name="x">Конечная точка</param>
 		/// <param name="value">Конечное значение функционала</param>
 		/// <param name="basisIndices">Индексы базиса оптимума</param>
 		/// <returns>Результат вычислений</returns>
-		public SimplexResult Solv(int[] startIndices, out Vector x, out double value, out int[] basisIndices)
+		public SimplexResult Solv(int[] startBasis, out Vector x, out double value, out int[] basisIndices)
 		{
-            if (startIndices.Distinct().Count() != A.Rows)
+            if (startBasis.Distinct().Count() != A.Rows)
             {
                 throw new ArgumentException("Insufficient number of basis columns");
             }
@@ -66,7 +66,7 @@ namespace Algorithms.LinearProgramming
             var columnsNumber = A.Columns;
             Log_.DebugFormat("Solving problem of size {0}x{1}", rowsNumber, columnsNumber);
 
-            // инициализируем массив индексов базисных переменных
+            // будет показывать, какая строка какую базисную переменную выражает через небазисные
             basisIndices = new int[rowsNumber];
 
             // строим матрицу для симплекс-метода
@@ -96,13 +96,15 @@ namespace Algorithms.LinearProgramming
             ++rowsNumber; // в m на одну строку больше
             // перестраиваем симплекс-таблицу в исходное состояние:
             // приводим подматрицу при базисных компонентах к единичной
-			foreach (var basisColumn in startIndices)
+			foreach (var basisColumn in startBasis)
 			{
 			    freeHash.Remove(basisColumn);
+                // Ищем строку, в которой при базисной переменной максимальное значение
 				var basisRowIndex = FindMaxRow(m, basisColumn, unusedRows);
 				basisIndices[basisRowIndex - 1] = basisColumn;
 				var basisRow = m[basisRowIndex];
 				var basisValue = basisRow[basisColumn];
+                // делим всю строку и правую часть на то самое максимальное значение
 				var basisR = r[basisRowIndex];
 				if (basisR != 0)
 				{
@@ -110,7 +112,7 @@ namespace Algorithms.LinearProgramming
 					r[basisRowIndex] = basisR;
 				}
 				basisRow[basisColumn] = 1;
-				foreach (var j in freeHash)
+				foreach (var j in freeHash) // обрабатываем только значения в небазисных столбцах, ибо в базисных нули
 				{
 					var jValue = basisRow[j];
 					if (jValue == 0)
@@ -119,6 +121,7 @@ namespace Algorithms.LinearProgramming
 					}
 					jValue /= basisValue;
 					basisRow[j] = jValue;
+                    // вычитаем строку из остальных
 					for (var k = 0; k < rowsNumber; ++k)
 					{
 						if (k == basisRowIndex)
@@ -134,6 +137,7 @@ namespace Algorithms.LinearProgramming
 						currentRow[j] -= jValue * coeff;
 					}
 				}
+                // вычитаем значение правой части из остальных
 				for (var k = 1; k < rowsNumber; ++k)
 				{
 					if (k == basisRowIndex)
@@ -156,11 +160,18 @@ namespace Algorithms.LinearProgramming
 			}
 
             // считаем исходное значение функционала
+            // в базисе все небазисные переменные - нули
+            // соответственно, значения базисных переменных - это просто правые части
 			var val = 0.0; 
 			for (var i = 0; i < basisIndices.Length; ++i)
 			{
+			    var v = r[i + 1];
+                if (v < -Epsilon) // такого быть не может. Это означает, что исходный базис - не базис
+                {
+                    throw new ArgumentException("Supplied basis is not a valid basis");
+                }
 				var index = basisIndices[i];
-				val += c[index] * r[i + 1];
+				val += c[index] * v;
 			}
 			r[0] = val;
 			x = new Vector(A.Columns);

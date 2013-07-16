@@ -1,26 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Common.Logging;
 
 namespace Algorithms.LinearProgramming
 {
-	/// <summary>Результат вычислений</summary>
-	public enum SimplexResult
-	{
-        /// <summary>Успех</summary>
-		Success = 0,
-        /// <summary>Множество допустимых x пусто</summary>
-		HullIsEmpty,
-        /// <summary>Цикл из-за округления</summary>
-		CycleDetected,
-        /// <summary>Функционал неограничен сверху</summary>
-		FunctionalUnbound,
-        /// <summary>Не удалось посчитать стартовую точку из-за ошибок округления</summary>
-        RoundingError,
-        /// <summary>Неизвестная ошибка</summary>
-		UnknownError
-	}
-
 	/// <summary>Класс для решения задачи ЛП Ax = b, x >= 0, cx -> max симплекс-методом</summary>
 	public class SimplexProblem
 	{
@@ -80,6 +64,8 @@ namespace Algorithms.LinearProgramming
             }
             var rowsNumber = A.Rows;
             var columnsNumber = A.Columns;
+            Log_.DebugFormat("Solving problem of size {0}x{1}", rowsNumber, columnsNumber);
+
             // инициализируем массив индексов базисных переменных
             basisIndices = new int[rowsNumber];
 
@@ -275,7 +261,8 @@ namespace Algorithms.LinearProgramming
             value = 0;
 		    int[] basisIndicies;
             // находим стартовую точку
-		    var r = FindFeasibleSolution(out basisIndicies);
+            var fp = new SimplexFeasibilityProblem(A, b);
+		    var r = fp.Solv(out basisIndicies);
             if (r != SimplexResult.Success)
             {
                 return r;
@@ -283,82 +270,6 @@ namespace Algorithms.LinearProgramming
             //теперь решаем собственно задачу
 			return Solv(basisIndicies, out x, out value);
 		}
-
-        /// <summary>Находит стартовый базис для задачи</summary>
-        /// <param name="basisIndices">Индексы базисных переменных</param>
-        /// <returns>Результат работы симплекс-метода</returns>
-        public SimplexResult FindFeasibleSolution(out int[] basisIndices)
-        {
-            basisIndices = null;
-            // решаем задачу Ax +- y = b, (-K, y) -> max, x >= 0, y >= 0. Если исходная задача имеет решение,
-            // то и данная имеет решение, причем ее решение дает точку, удовлетворяющую системе Ax=b и y = 0
-            // если в правой части есть отрицательное число, то соответствующую доп. переменную нужно добавить со знаком минус
-            // иначе будет косяк со стартовым базисом
-            var rowsNumber = A.Rows;
-            var columnsNumber = A.Columns;
-            var A1 = new Matrix(rowsNumber, columnsNumber + rowsNumber);
-            var startIndicies = new int[A.Rows]; // стартовый базис
-            for (var i = 0; i < rowsNumber; ++i)
-            {
-                var ra1 = A1[i];
-                var ra = A[i];
-                Array.Copy(ra, 0, ra1, 0, columnsNumber);
-                var j = columnsNumber + i;
-                A1[i][j] = b[i] < 0 ? -1 : 1;
-                startIndicies[i] = j;
-            }
-            var c1 = new Vector(A.Columns + A.Rows); // целевой функционал. значения пропишем ниже
-            var eq = new SimplexProblem(A1, b, c1);
-            var result = SimplexResult.Success;
-            const double startHalfK = -500;
-            var K = startHalfK;
-            // TODO: Тут можно попробовать придумать способ найти более грамотные стартовые Ci
-            // такие, что -sum (CiAik) < - L < 0. хотя не факт, что это поможет
-            for (var iter = 0; iter < 100; ++iter) //максимальное число итераций
-            {
-                K *= 2;
-                for (var i = 0; i < A.Rows; ++i)
-                {
-                    c1[i + columnsNumber] = K;
-                }
-                Vector x1;
-                double value;
-                result = eq.Solv(startIndicies, out x1, out value, out basisIndices);
-                if (result != SimplexResult.FunctionalUnbound)
-                {
-                    break;
-                }
-                // unbound невозможен по смыслу задачи. он возможен только из-за ошибок вычислений.
-                // пытаемся его подавить, увеличив коэффициенты
-                var bIndex = 0;
-                for (; bIndex < basisIndices.Length; ++bIndex)
-                {
-                    // в базисе осталась вспомогательная переменная
-                    if (basisIndices[bIndex] >= columnsNumber)
-                    {
-                        break;
-                    }
-                }
-                if (bIndex == basisIndices.Length)
-                {
-                    //в "оптимуме" нет небазисных переменных. мы нашли стартовое решение
-                    result = SimplexResult.Success;
-                    break;
-                }
-            }
-            if (result != SimplexResult.Success)
-            {
-                return result == SimplexResult.FunctionalUnbound ? SimplexResult.RoundingError : result;
-            }
-            // может так оказаться, что в оптимальном решении вспомогательной задачи
-            // остались ненулевые вспомогательные переменные. Это означает, что исходная задача не имеет решения
-            if (basisIndices.Any(t => t >= columnsNumber))
-            {
-                return SimplexResult.HullIsEmpty;
-            }
-            return SimplexResult.Success;
-        }
-
 
 		/// <summary>Поиск минимального коэффициента у функционала</summary>
 		private static int FindMinColumn(Matrix m)
@@ -428,5 +339,7 @@ namespace Algorithms.LinearProgramming
 			}
 			return ind;
 		}
+
+        private readonly static ILog Log_ = LogManager.GetCurrentClassLogger();
 	}
 }

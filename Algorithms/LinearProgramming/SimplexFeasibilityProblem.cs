@@ -29,7 +29,7 @@ namespace Algorithms.LinearProgramming
         public SimplexResult Solv(out int[] basisIndices)
         {
             Vector x;
-            return Solv(out basisIndices, out x);
+            return SolvImpl(out basisIndices, out x);
         }
 
         /// <summary>Находит стартовый базис для задачи</summary>
@@ -37,6 +37,24 @@ namespace Algorithms.LinearProgramming
         /// <param name="x">Значения переменных</param>
         /// <returns>Результат работы симплекс-метода</returns>
         public SimplexResult Solv(out int[] basisIndices, out Vector x)
+        {
+            var r = SolvImpl(out basisIndices, out x);
+            if (r != SimplexResult.Success)
+            {
+                return r;
+            }
+            var length = A.Columns;
+            var v = new Vector(length);
+            Array.Copy(x.Values, 0, v.Values, 0, length);
+            x = v;
+            return SimplexResult.Success;
+        }
+
+        /// <summary>Находит стартовый базис для задачи</summary>
+        /// <param name="basisIndices">Индексы базисных переменных</param>
+        /// <param name="x">Значения переменных</param>
+        /// <returns>Результат работы симплекс-метода</returns>
+        public SimplexResult SolvImpl(out int[] basisIndices, out Vector x)
         {
             basisIndices = null;
             x = null;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Algorithms.LinearProgramming
@@ -9,9 +10,9 @@ namespace Algorithms.LinearProgramming
         private static readonly Random Rnd_ = new Random();
 
         /// <summary>Конструктор</summary>
-        public SimplexFeasibilityProblem(Matrix A, Vector b)
+        public SimplexFeasibilityProblem(decimal[][] A, decimal[] b)
         {
-            if (A.Rows != b.Count)
+            if (A.Length != b.Length)
             {
                 throw new ArgumentException("Dimensions of A and b are incompatible");
             }
@@ -20,17 +21,17 @@ namespace Algorithms.LinearProgramming
         }
 
         /// <summary>Матрица системы уравнений Ax=b</summary>
-        public Matrix A { get; private set; }
+        public decimal[][] A { get; private set; }
 
         /// <summary>Правая часть системы Ax=b</summary>
-        public Vector b { get; private set; }
+        public decimal[] b { get; private set; }
 
         /// <summary>Находит стартовый базис для задачи</summary>
         /// <param name="basisIndices">Индексы базисных переменных</param>
         /// <returns>Результат работы симплекс-метода</returns>
         public SimplexResult Solv(out int[] basisIndices)
         {
-            Vector x;
+            decimal[] x;
             return SolvImpl(out basisIndices, out x);
         }
 
@@ -38,17 +39,15 @@ namespace Algorithms.LinearProgramming
         /// <param name="basisIndices">Индексы базисных переменных</param>
         /// <param name="x">Значения переменных</param>
         /// <returns>Результат работы симплекс-метода</returns>
-        public SimplexResult Solv(out int[] basisIndices, out Vector x)
+        public SimplexResult Solv(out int[] basisIndices, out decimal[] x)
         {
             var r = SolvImpl(out basisIndices, out x);
             if (r != SimplexResult.Success)
             {
                 return r;
             }
-            var length = A.Columns;
-            var v = new Vector(length);
-            Array.Copy(x.Values, 0, v.Values, 0, length);
-            x = v;
+            var length = A[0].Length;
+            Array.Resize(ref x, length);
             return SimplexResult.Success;
         }
 
@@ -56,7 +55,7 @@ namespace Algorithms.LinearProgramming
         /// <param name="basisIndices">Индексы базисных переменных</param>
         /// <param name="x">Значения переменных</param>
         /// <returns>Результат работы симплекс-метода</returns>
-        public SimplexResult SolvImpl(out int[] basisIndices, out Vector x)
+        public SimplexResult SolvImpl(out int[] basisIndices, out decimal[] x)
         {
             basisIndices = null;
             x = null;
@@ -64,21 +63,22 @@ namespace Algorithms.LinearProgramming
             // то и данная имеет решение, причем ее решение дает точку, удовлетворяющую системе Ax=b и y = 0
             // если в правой части есть отрицательное число, то соответствующую доп. переменную нужно добавить со знаком минус
             // иначе будет косяк со стартовым базисом
-            var rowsNumber = A.Rows;
-            var columnsNumber = A.Columns;
-            var A1 = new Matrix(rowsNumber, columnsNumber + rowsNumber);
-            var startIndicies = new int[A.Rows]; // стартовый базис
+            var rowsNumber = A.Length;
+            var columnsNumber = A[0].Length;
+            var a1 = new decimal[rowsNumber][];
+            var extendedColumnsNumber = columnsNumber + rowsNumber;
+            var startIndicies = new int[rowsNumber]; // стартовый базис
             for (var i = 0; i < rowsNumber; ++i)
             {
-                var ra1 = A1[i];
-                var ra = A[i];
-                Array.Copy(ra, 0, ra1, 0, columnsNumber);
+                var rowA1 = new decimal[extendedColumnsNumber];
+                Array.Copy(A[i], 0, rowA1, 0, columnsNumber);
+                a1[i] = rowA1;
                 var j = columnsNumber + i;
-                A1[i][j] = b[i] < 0 ? -1 : 1;
+                a1[i][j] = b[i] < 0 ? -1 : 1;
                 startIndicies[i] = j;
             }
-            var c1 = new Vector(rowsNumber + columnsNumber); // целевой функционал. значения пропишем ниже
-            var eq = new SimplexProblem(A1, b, c1);
+            var c1 = new decimal[extendedColumnsNumber]; // целевой функционал. значения пропишем ниже
+            var eq = new SimplexProblem(a1, b, c1);
             var result = SimplexResult.Success;
             const int startHalfK = 8;
             var K = startHalfK;
@@ -88,11 +88,11 @@ namespace Algorithms.LinearProgramming
             while (K < 1000000)
             {
                 K *= 2;
-                for (var i = 0; i < A.Rows; ++i)
+                for (var i = 0; i < A.Length; ++i)
                 {
                     c1[i + columnsNumber] = -Rnd_.Next(K, K * 2);
                 }
-                double value;
+                decimal value;
                 result = eq.Solv(startIndicies, out x, out value, out basisIndices);
                 if (result == SimplexResult.Success && basisIndices.Any(t => t >= columnsNumber))
                 {

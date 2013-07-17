@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Algorithms;
 using Algorithms.LinearProgramming;
 using NUnit.Framework;
@@ -14,17 +15,17 @@ namespace Tests.LinearProgramming
 			for (var i =0; i < 100000; ++i)
 			{
 				// x + y <= 1, x->max
-                var A = new Matrix(new[] { new[] { 1.0, 1 } });
-                var b = new Vector(new[] { 1.0 });
-                var c = new Vector(new[] { 1.0, 0 });
+                var A = new[] { new[] { 1m, 1 } };
+                var b = new[] { 1m };
+                var c = new[] { 1m, 0 };
 				var eq = new SeideProblem(A, b, c);
-				Vector x;
-				double val;
+				decimal[] x;
+				decimal val;
 				var res = eq.Solv(out x, out val);
 				Assert.AreEqual(res, SimplexResult.Success);
-				Assert.AreEqual(1, x[0]);
-				Assert.AreEqual(0, x[1]);
-                Assert.AreEqual(1, val);
+				Assert.AreEqual(1m, x[0]);
+				Assert.AreEqual(0m, x[1]);
+                Assert.AreEqual(1m, val);
             }
 		}
 
@@ -34,17 +35,17 @@ namespace Tests.LinearProgramming
 			for (var i =0; i < 100000; ++i)
 			{
 				// x + y <= 1, y->max
-                var A = new Matrix(new[] { new[] { 1.0, 1 } });
-                var b = new Vector(new[] { 1.0 });
-                var c = new Vector(new[] { 0.0, 1 });
+                var A = new[] { new[] { 1m, 1 } };
+                var b = new[] { 1m };
+                var c = new[] { 0m, 1 };
                 var eq = new SeideProblem(A, b, c);
-				Vector x;
-				double val;
+				decimal[] x;
+				decimal val;
 				var res = eq.Solv(out x, out val);
 				Assert.AreEqual(res, SimplexResult.Success);
-				Assert.AreEqual(1, x[1]);
-				Assert.AreEqual(0, x[0]);
-                Assert.AreEqual(1, val);
+				Assert.AreEqual(1m, x[1]);
+				Assert.AreEqual(0m, x[0]);
+                Assert.AreEqual(1m, val);
             }
 		}
 
@@ -54,12 +55,12 @@ namespace Tests.LinearProgramming
 			for (var i = 0; i < 100000; ++i)
 			{
 				// x + y <= 1, -y->max
-                var A = new Matrix(new[] { new[] { 1.0, 1 } });
-                var b = new Vector(new[] { 1.0 });
-                var c = new Vector(new[] { 0.0, -1 });
+                var A = new[] { new[] { 1m, 1 } };
+                var b = new[] { 1m };
+                var c = new[] { 0m, -1 };
                 var eq = new SeideProblem(A, b, c);
-				Vector x;
-				double val;
+				decimal[] x;
+				decimal val;
 				var res = eq.Solv(out x, out val);
 				Assert.AreEqual(res, SimplexResult.Success);
 				Assert.AreEqual(0, x[1]);
@@ -74,22 +75,22 @@ namespace Tests.LinearProgramming
 			for (var i = 0; i < 100000; ++i)
 			{
 				//x+y+z<=1, x-y <= 0, -x-y->max
-                var A = new Matrix(new[]
+                var A = new[]
                 {
-                    new[] { 1.0, 1, 1 },
-                    new[] { 1.0, -1, 0 }
-                });
-                var b = new Vector(new[] { 1.0, 0 });
-                var c = new Vector(new[] { -1.0, -1, 0 });
+                    new[] { 1m, 1, 1 },
+                    new[] { 1m, -1, 0 }
+                };
+                var b = new[] { 1m, 0 };
+                var c = new[] { -1m, -1, 0 };
 				var eq = new SeideProblem(A, b, c);
-				Vector x;
-				double val;
+				decimal[] x;
+				decimal val;
 				var res = eq.Solv(out x, out val);
 				Assert.AreEqual(res, SimplexResult.Success);
-				Assert.AreEqual(0, x[0]);
-				Assert.AreEqual(0, x[1]);
-				Assert.AreEqual(1, x[2]);
-                Assert.AreEqual(0, val);
+				Assert.AreEqual(0m, x[0]);
+				Assert.AreEqual(0m, x[1]);
+				Assert.AreEqual(1m, x[2]);
+                Assert.AreEqual(0m, val);
             }
 		}
 
@@ -99,22 +100,22 @@ namespace Tests.LinearProgramming
 			for (var i = 0; i < 100000; ++i)
 			{
 				// 2x1 + x2 <= 64, x1 + 3x2 <= 72, x2 <= 20, 4x1 + 6x2->max
-                var A = new Matrix(new[]
+                var A = new[]
                 {
-                    new[] { 2.0, 1 },
-                    new[] { 1.0, 3 },
-                    new[] { 0.0, 1 }
-                });
-                var b = new Vector(new[] { 64.0, 72, 20 });
-                var c = new Vector(new[] { 4.0, 6 });
+                    new[] { 2m, 1 },
+                    new[] { 1m, 3 },
+                    new[] { 0m, 1 }
+                };
+                var b = new[] { 64m, 72, 20 };
+                var c = new[] { 4m, 6 };
 				var eq = new SeideProblem(A, b, c);
-				Vector x;
-				double val;
+				decimal[] x;
+				decimal val;
 				var res = eq.Solv(out x, out val);
 				Assert.AreEqual(res, SimplexResult.Success);
-				Assert.AreEqual(24, x[0]);
-				Assert.AreEqual(16, x[1]);
-                Assert.AreEqual(192, val);
+				Assert.AreEqual(24m, x[0]);
+				Assert.AreEqual(16m, x[1]);
+                Assert.AreEqual(192m, val);
             }
 		}
 
@@ -124,24 +125,24 @@ namespace Tests.LinearProgramming
 			for (var i = 0; i < 100000; ++i)
 			{
 				//-3x1 - 4x2 <= -6, x1 + 3x2 - y <= 3, 2x1 + x2 <= 4, y <= 0 4x1 + 16x2->max
-                var A = new Matrix(new[]
+                var A = new[]
                 {
-                    new[] { -3.0, -4, 0 },
-                    new[] { 1.0, 3, -1 },
-                    new[] { 2.0, 1, 0 },
-                    new[] { 0.0, 0, 1 }
-                });
-                var b = new Vector(new[] { -6.0, 3, 4, 0 });
-                var c = new Vector(new[] { 4.0, 16, 0 });
+                    new[] { -3m, -4, 0 },
+                    new[] { 1m, 3, -1 },
+                    new[] { 2m, 1, 0 },
+                    new[] { 0m, 0, 1 }
+                };
+                var b = new[] { -6m, 3, 4, 0 };
+                var c = new[] { 4m, 16, 0 };
 				var eq = new SeideProblem(A, b, c);
-				Vector x;
-				double val;
+				decimal[] x;
+				decimal val;
 				var res = eq.Solv(out x, out val);
 				Assert.AreEqual(SimplexResult.Success, res);
-				Assert.AreEqual(6.0 / 5, Math.Round(x[0], 2));
-				Assert.AreEqual(3.0 / 5, Math.Round(x[1], 2));
-				Assert.AreEqual(0, x[2]);
-                Assert.AreEqual(72.0 / 5, Math.Round(val, 2));
+				Assert.AreEqual(6m / 5, Math.Round(x[0], 2));
+				Assert.AreEqual(3m / 5, Math.Round(x[1], 2));
+				Assert.AreEqual(0m, x[2]);
+                Assert.AreEqual(72m / 5, Math.Round(val, 2));
             }
 		}
 
@@ -155,13 +156,13 @@ namespace Tests.LinearProgramming
 		private static SeideProblem CreateLP(int[][] points, double[] p)
 		{
 			var n = p.Length;
-			var dp = new double[n];
-			var dx = new double[n]; // xi / pi
-			var dy = new double[n]; // yi / pi
-			var dz = new double[n]; // zi / pi
+			var dp = new decimal[n];
+            var dx = new decimal[n]; // xi / pi
+            var dy = new decimal[n]; // yi / pi
+            var dz = new decimal[n]; // zi / pi
 			for (var i = 0; i < n; ++i)
 			{
-				var v = 1 / p[i];
+				var v = 1 / (decimal)p[i];
 				dp[i] = v;
 				dx[i] = points[i][0] * v; dy[i] = points[i][1] * v; dz[i] = points[i][2] * v;
 			}
@@ -174,8 +175,8 @@ namespace Tests.LinearProgramming
 
 			// заполняем матрицу A и вектор b
 			// Au=b, u = (P, x, y, z)
-			var A = new Matrix(8 * n, 4);
-			var b = new Vector(8 * n);
+			var A = new decimal[8 * n][];
+			var b = new decimal[8 * n];
 			
 			var xsign = new[] { 1, 1, 1, 1, -1, -1, -1, -1 };
 			var ysign = new[] { 1, 1, -1, -1, 1, 1, -1, -1 };
@@ -186,15 +187,18 @@ namespace Tests.LinearProgramming
 				for (var k = 0; k < 8; ++k)
 				{
 					var ki = 8 * i + k;
-					var row = A[ki];
+					var row = new decimal[4];
+				    A[ki] = row;
 					row[0] = -1; //p
-					row[1] = -dp[i] * xsign[k]; row[2] = -dp[i] * ysign[k]; row[3] = -dp[i] * zsign[k]; //x,y,z
+					row[1] = -dp[i] * xsign[k];
+                    row[2] = -dp[i] * ysign[k];
+                    row[3] = -dp[i] * zsign[k]; //x,y,z
 					b[ki] = -xsign[k] * dx[i] - ysign[k] * dy[i] -zsign[k] * dz[i];
 				}
 			}
 
 			// функционал -p -> max
-			var c = new Vector(4);
+			var c = new decimal[4];
 			c[0] = -1;
 
 			return new SeideProblem(A, b, c);
@@ -218,11 +222,11 @@ namespace Tests.LinearProgramming
 			var eq = CreateLP(points, p);
 			for (var t = 0; t < 150000; ++t)
 			{
-				double result;
-				Vector opt; //финальный результат
+				decimal result;
+				decimal[] opt; //финальный результат
 			    var rs = eq.Solv(out opt, out result);
 			    Assert.AreEqual(SimplexResult.Success, rs);
-			    Assert.AreEqual(3.5, Math.Round(-result, 6));
+			    Assert.AreEqual(3.5m, Math.Round(-result, 6));
 			}
 		}
 		
@@ -242,11 +246,11 @@ namespace Tests.LinearProgramming
 			var eq = CreateLP(points, p);
 			for (var t = 0; t < 150000; ++t)
 			{
-				double result;
-				Vector opt; //финальный результат
+				decimal result;
+				decimal[] opt; //финальный результат
 			    var rs = eq.Solv(out opt, out result);
 				Assert.AreEqual(SimplexResult.Success, rs);
-				Assert.AreEqual(2.333333, Math.Round(-result, 6));
+				Assert.AreEqual(2.333333m, Math.Round(-result, 6));
 			}
 		}
 
@@ -281,11 +285,11 @@ namespace Tests.LinearProgramming
 			var eq = CreateLP(points, p);
 			for (var t = 0; t < 20000; ++t)
 			{
-				double result;
-				Vector opt; //финальный результат
+				decimal result;
+				decimal[] opt; //финальный результат
 			    var rs = eq.Solv(out opt, out result);
 				Assert.AreEqual(SimplexResult.Success, rs);
-				Assert.AreEqual(352018, Math.Round(-result, 6));
+				Assert.AreEqual(352018m, Math.Round(-result, 6));
 			}
 		}
 	}

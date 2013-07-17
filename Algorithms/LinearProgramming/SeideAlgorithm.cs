@@ -7,16 +7,17 @@ namespace Algorithms.LinearProgramming
 {
 	/// <summary>Решение задачи LP Ax &lt;= b, cx -> max алгоритмом Seide (см. 9.10 в книге Randomized Algorithms)
 	/// ожидание сложности O(nd!), n - число неравенств, d - число базисных переменных
+	/// Хорош для решения задач, где ограничений гораздо больше, чем переменных
 	/// </summary>
 	public class SeideProblem
 	{
-		public SeideProblem(Matrix A, Vector b, Vector c)
+        public SeideProblem(decimal[][] A, decimal[] b, decimal[] c)
 		{
-            if (A.Rows != b.Count)
+            if (A.Length != b.Length)
             {
                 throw new ArgumentException("Dimensions of A and b are incompatible");
             }
-            if (A.Columns != c.Count)
+            if (A[0].Length != c.Length)
             {
                 throw new ArgumentException("Dimensions of A and c are incompatible");
             }
@@ -25,11 +26,11 @@ namespace Algorithms.LinearProgramming
 			this.c = c;
 		}
 
-		public Matrix A { get; private set; }
+		public decimal[][] A { get; private set; }
 
-		public Vector b { get; private set; }
+		public decimal[] b { get; private set; }
 
-		public Vector c { get; private set; }
+        public decimal[] c { get; private set; }
 
 		/// <summary>
 		/// Решает задачу LP алгоритмом Seide
@@ -38,12 +39,12 @@ namespace Algorithms.LinearProgramming
 		/// <param name="x">Оптимальная точка</param>
 		/// <param name="value">Оптимальное значение функционала</param>
 		/// <returns></returns>
-		public SimplexResult Solv(out Vector x, out double value)
+		public SimplexResult Solv(out decimal[] x, out decimal value)
 		{
             // инициализация результата
 			x = null;
-		    var rowsNumber = A.Rows;
-			var a = new double[rowsNumber][];
+		    var rowsNumber = A.Length;
+			var a = new decimal[rowsNumber][];
 			for (var i = 0; i < rowsNumber; ++i)
 			{
 				a[i] = A[i];
@@ -64,8 +65,8 @@ namespace Algorithms.LinearProgramming
 					// просто решаем задачу симлекс-методом
 					// добавляем вспомогательные переменные, чтобы превратить неравенства в равенства
                     var eq = BuildSimplexProblem(currentState_);
-                    Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Rows, eq.A.Columns);
-                    Vector x1;
+                    Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Length, eq.c.Length);
+                    decimal[] x1;
 					var result = eq.Solv(out x1, out value);
 					if (result != SimplexResult.Success)
 					{
@@ -86,7 +87,7 @@ namespace Algorithms.LinearProgramming
 							rows = currentState_.Rows;
 							columns = currentState_.Columns;
 							eq = BuildSimplexProblem(currentState_);
-                            Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Rows, eq.A.Columns);
+                            Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Length, eq.c.Length);
 							result = eq.Solv(out x1, out value);
 						}
 						if (result != SimplexResult.Success)
@@ -109,8 +110,8 @@ namespace Algorithms.LinearProgramming
 					if (result == SimplexResult.Success)
 					{
 						// убираем лишние переменные
-						x = new Vector(columns);
-						Array.Copy(((Matrix)x1)[0], ((Matrix)x)[0], columns);
+						x = new decimal[columns];
+						Array.Copy(x1, x, columns);
 						// возвращаемся на уровень выше
 					}
 					while (states_.Count > 0)
@@ -125,7 +126,7 @@ namespace Algorithms.LinearProgramming
 #region удаляли строку
 							var removedRow = previousState.NewState.RemovedRow;
 							// проверяем, нарушает ли решение удаленное ограничение
-							var val = 0.0;
+							var val = 0.0m;
 							if (result == SimplexResult.Success)
 							{
 								for (var i = 0; i < columns; ++i)
@@ -150,7 +151,7 @@ namespace Algorithms.LinearProgramming
 										columnIndexToRemove = i;
 									}
 								}
-								var tempRow = new double[columns];
+								var tempRow = new decimal[columns];
 								Array.Copy(removedRow, tempRow, columns);
 								removedRow = tempRow;
                                 if (maxValue < SimplexProblem.Epsilon)
@@ -192,11 +193,11 @@ namespace Algorithms.LinearProgramming
                                             removedRow[j] = jValue;
                                         }
                                     }
-                                    var newA = new double[rows + 1][];
-                                    var newB = new Vector(rows + 1);
+                                    var newA = new decimal[rows + 1][];
+                                    var newB = new decimal[rows + 1];
                                     for (var i = 0; i < rows; ++i)
                                     {
-                                        var newRow = new double[columns - 1];
+                                        var newRow = new decimal[columns - 1];
                                         var row = currentState_.A[i];
                                         var rowLeadValue = row[columnIndexToRemove];
                                         var currentColumn = 0;
@@ -225,9 +226,9 @@ namespace Algorithms.LinearProgramming
                                         }
                                         newB[i] = bValue;
                                     }
-                                    var newC = new Vector(columns - 1);
+                                    var newC = new decimal[columns - 1];
                                     var cLeadValue = currentState_.c[columnIndexToRemove];
-                                    var newLastRow = new double[columns - 1];
+                                    var newLastRow = new decimal[columns - 1];
                                     var newColumnIndex = 0;
                                     for (var j = 0; j < columns; ++j)
                                     {
@@ -276,7 +277,7 @@ namespace Algorithms.LinearProgramming
 							        continue; // переход на открутку на предыдущий уровень
 							    }
 							    result = SimplexResult.Success;
-							    x = new Vector(1);
+							    x = new decimal[1];
 							    x[0] = bLeadValue;
 							    value = bLeadValue != 0 ? currentState_.c[0] * bLeadValue : 0;
 							}
@@ -289,9 +290,9 @@ namespace Algorithms.LinearProgramming
 							// до этого удаляли переменную
 							// вычислим ее, новый вектор x и новое значение функционала
 							var removedRow = previousState.CurrentState.A[removedRowIndex];
-							var newX = new Vector(columns + 1);
+							var newX = new decimal[columns + 1];
 							var xRemoved = previousState.CurrentState.b[removedRowIndex];
-							double newVal = 0;
+							decimal newVal = 0;
 							var xIndex = 0;
 							for (var i = 0; i < columns + 1; ++i)
 							{
@@ -344,16 +345,18 @@ namespace Algorithms.LinearProgramming
         {
             var rows = state.Rows;
             var columns = state.Columns;
-            var A1 = new Matrix(rows, columns + rows);
+            var extendedColumns = columns + rows;
+            var A1 = new decimal[rows][];
             for (var i = 0; i < rows; ++i)
             {
                 var srcRow = state.A[i];
-                var tgtRow = A1[i];
+                var tgtRow = new decimal[extendedColumns];
                 Array.Copy(srcRow, tgtRow, columns);
+                A1[i] = tgtRow;
                 tgtRow[columns + i] = 1;
             }
-            var c1 = new Vector(columns + rows);
-            Array.Copy(((Matrix)state.c)[0], ((Matrix)c1)[0], columns);
+            var c1 = new decimal[extendedColumns];
+            Array.Copy(state.c, c1, columns);
             return new SimplexProblem(A1, state.b, c1);
         }
 
@@ -393,7 +396,7 @@ namespace Algorithms.LinearProgramming
 		/// <summary>Стек состояний</summary>
 		Stack<State> states_;
 
-	    private static ILog Log_ = LogManager.GetCurrentClassLogger();
+	    private static readonly ILog Log_ = LogManager.GetCurrentClassLogger();
 
 	    #endregion поля
 	}
@@ -402,19 +405,19 @@ namespace Algorithms.LinearProgramming
     internal class LazyState
 	{
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public double[][] A
+		public decimal[][] A
 		{
 			get { return removedRows_ == null ? A_ : CalcState().A; }
 		}
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public Vector b
+        public decimal[] b
 		{
 			get { return removedRows_ == null ? b_ : CalcState().b; }
 		}
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public Vector c
+		public decimal[] c
 		{
 			get { return removedRows_ == null ? c_ : CalcState().c; }
 		}
@@ -426,21 +429,21 @@ namespace Algorithms.LinearProgramming
 
 		public int Columns
 		{
-			get { return c_.Count; }
+			get { return c_.Length; }
 		}
 
-		public double[] RemovedRow
+		public decimal[] RemovedRow
 		{
 			get { return removedRow_; }
 		}
 
-		public double RemovedB
+		public decimal RemovedB
 		{
 			get { return removedB_; }
 		}
 
 		/// <summary>Явная установка стейта</summary>
-		public void SetState(double[][] A, Vector b, Vector c)
+		public void SetState(decimal[][] A, decimal[] b, decimal[] c)
 		{
 			A_ = A;
 			b_ = b;
@@ -528,13 +531,13 @@ namespace Algorithms.LinearProgramming
 
 		private LazyState CalcState()
 		{
-            double[][] newA;
-            Vector newB;
+            decimal[][] newA;
+            decimal[] newB;
 			if (leftRows_ == null) //специальная версия для случая удаления только одной строки
 			{
 				var rows = A_.Length - 1;
-				newA = new double[rows][];
-				newB = new Vector(rows);
+				newA = new decimal[rows][];
+				newB = new decimal[rows];
 				var deletedRowIndex = removedRows_[0];
 				var insertIndex = 0;
 				for (var i = 0; i <= rows; ++i)
@@ -550,8 +553,8 @@ namespace Algorithms.LinearProgramming
 			else
 			{
 				EnsureLeftRows();
-				newA = new double[leftRows_.Count][];
-				newB = new Vector(leftRows_.Count);
+				newA = new decimal[leftRows_.Count][];
+                newB = new decimal[leftRows_.Count];
 				var insertIndex = 0;
 				foreach (var i in leftRows_)
 				{
@@ -590,13 +593,13 @@ namespace Algorithms.LinearProgramming
 		/// <summary>Счетчик удаленных строк</summary>
 		private int removedRowsCount_;
 		/// <summary>Исходное значение A</summary>
-		private double[][] A_;
+		private decimal[][] A_;
 		/// <summary>Индексы оставшихся переменных</summary>
 		private List<int> leftRows_;
-		private Vector b_;
-		private Vector c_;
-		private double[] removedRow_;
-		private double removedB_;
+		private decimal[] b_;
+        private decimal[] c_;
+		private decimal[] removedRow_;
+        private decimal removedB_;
 	}
 
 	/// <summary>Состояние алгоритма</summary>

@@ -10,10 +10,10 @@ namespace Algorithms
 		/// <summary>Конструктор вектора длины n</summary>
 		public Vector(int n) : base(1, n) {}
         /// <summary>Конструктор из списка значений</summary>
-        public Vector(IList<double> values) : base(new [] { values }) {}
+        public Vector(IList<decimal> values) : base(new [] { values }) {}
 
 		/// <summary>Индексер элементов вектора</summary>
-		public new double this[int i]
+        public new decimal this[int i]
 		{
 			get { return base[0][i]; }
 			set { base[0][i] = value; }
@@ -33,9 +33,6 @@ namespace Algorithms
 		{
 			get { return Columns; }
 		}
-
-        /// <summary>Массив значений</summary>
-        public double[] Values { get { return base[0]; } }
 	}
 
 	/// <summary>Матрица M x N</summary>
@@ -46,18 +43,18 @@ namespace Algorithms
 		/// <param name="n">Число столбцов</param>
 		public Matrix(int m, int n)
 		{
-			Vals_ = new double[m][];
+            Vals_ = new decimal[m][];
 			for (var i = 0; i < m; ++i)
 			{
-                Vals_[i] = new double[n];
+                Vals_[i] = new decimal[n];
 			}
 		}
 
         /// <summary>Конструктор из значений</summary>
-        public Matrix(IList<IList<double>> values)
+        public Matrix(IList<IList<decimal>> values)
         {
             var rows = values.Count;
-            Vals_ = new double[rows][];
+            Vals_ = new decimal[rows][];
             Vals_[0] = values[0].ToArray();
             var columns = values[0].Count;
             if (columns == 0)
@@ -77,10 +74,10 @@ namespace Algorithms
 		/// <summary>Конструктор копии матрицы</summary>
 		public Matrix(Matrix other)
 		{
-			Vals_ = new double[other.Vals_.Length][];
+            Vals_ = new decimal[other.Vals_.Length][];
 			for (var i = 0; i < other.Vals_.Length; ++i)
 			{
-			    Vals_[i] = (double[])other.Vals_[i].Clone();
+                Vals_[i] = (decimal[])other.Vals_[i].Clone();
 			}
 		}
 
@@ -91,20 +88,20 @@ namespace Algorithms
 		}
 
 		/// <summary>Индексер элементов матрицы</summary>
-		public double[] this[int i]
+        public decimal[] this[int i]
 		{
 			get { return Vals_[i]; }
 		}
 
         /// <summary>Посторочный вид</summary>
-	    public double[][] RowView
+        public decimal[][] RowView
 	    {
 	        get { return Vals_; }
 	    }
 
         /// <summary>Поколоночный вид</summary>
         /// <remarks>По сути новая матрица. Поэтому медленно и нельзя через нее модифицировать</remarks>
-	    public double[][] ColumnView
+        public decimal[][] ColumnView
 	    {
             get { return Transpose().RowView; }
 	    }
@@ -155,6 +152,6 @@ namespace Algorithms
 		#endregion Статические методы
 
 		/// <summary>Значения матрицы</summary>
-		protected double[][] Vals_;
+        protected decimal[][] Vals_;
 	}
 }

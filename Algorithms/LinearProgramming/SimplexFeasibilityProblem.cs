@@ -60,10 +60,11 @@ namespace Algorithms.LinearProgramming
             var c1 = new Vector(rowsNumber + columnsNumber); // целевой функционал. значения пропишем ниже
             var eq = new SimplexProblem(A1, b, c1);
             var result = SimplexResult.Success;
-            const double startHalfK = -500;
+            const double startHalfK = -1;
             var K = startHalfK;
             // TODO: Тут можно попробовать придумать способ найти более грамотные стартовые Ci
             // такие, что -sum (CiAik) < - L < 0. хотя не факт, что это поможет
+            // из-за округления могут быть проблемы как с малыми K, так и с большими :(
             for (var iter = 0; iter < 100; ++iter) //максимальное число итераций
             {
                 K *= 2;
@@ -79,21 +80,6 @@ namespace Algorithms.LinearProgramming
                 }
                 // unbound невозможен по смыслу задачи. он возможен только из-за ошибок вычислений.
                 // пытаемся его подавить, увеличив коэффициенты
-                var bIndex = 0;
-                for (; bIndex < basisIndices.Length; ++bIndex)
-                {
-                    // в базисе осталась вспомогательная переменная
-                    if (basisIndices[bIndex] >= columnsNumber)
-                    {
-                        break;
-                    }
-                }
-                if (bIndex == basisIndices.Length)
-                {
-                    //в "оптимуме" нет небазисных переменных. мы нашли стартовое решение
-                    result = SimplexResult.Success;
-                    break;
-                }
             }
             if (result != SimplexResult.Success)
             {

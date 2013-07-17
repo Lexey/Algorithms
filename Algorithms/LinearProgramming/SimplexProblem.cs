@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Common.Logging;
 
@@ -104,6 +105,10 @@ namespace Algorithms.LinearProgramming
 				basisIndices[basisRowIndex - 1] = basisColumn;
 				var basisRow = m[basisRowIndex];
 				var basisValue = basisRow[basisColumn];
+                if (basisValue == 0)
+                {
+                    throw new ArgumentException("Bad basis or the system is lineary dependent");
+                }
                 // делим всю строку и правую часть на то самое максимальное значение
 				var basisR = r[basisRowIndex];
 				if (basisR != 0)
@@ -248,6 +253,10 @@ namespace Algorithms.LinearProgramming
 						if (coeff != 0)
 						{
                             r[k] -= leadR * coeff;
+                            if (k > 0 && r[k] < -Epsilon)
+                            {
+                                return SimplexResult.RoundingError;
+                            }
 						}
 					}
 					currentRow[newBasisColumn] = 0;

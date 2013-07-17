@@ -96,7 +96,20 @@ namespace Algorithms
 			get { return Vals_[i]; }
 		}
 
-		/// <summary>Возвращает транспонированную матрицу</summary>
+        /// <summary>Посторочный вид</summary>
+	    public double[][] RowView
+	    {
+	        get { return Vals_; }
+	    }
+
+        /// <summary>Поколоночный вид</summary>
+        /// <remarks>По сути новая матрица. Поэтому медленно и нельзя через нее модифицировать</remarks>
+	    public double[][] ColumnView
+	    {
+            get { return Transpose().RowView; }
+	    }
+
+	    /// <summary>Возвращает транспонированную матрицу</summary>
 		public Matrix Transpose()
 		{
 			var m = new Matrix(Vals_[0].Length, Vals_.Length);

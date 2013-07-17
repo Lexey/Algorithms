@@ -72,7 +72,7 @@ namespace Algorithms.LinearProgramming
             }
             var rowsNumber = A.Length;
             var columnsNumber = c.Length;
-            Log_.DebugFormat("Solving problem of size {0}x{1}", rowsNumber, columnsNumber);
+            Log_.DebugFormat("Solving a problem of a size {0}x{1}", rowsNumber, columnsNumber);
 
             // будет показывать, какая строка какую базисную переменную выражает через небазисные
             basisIndices = new int[rowsNumber];

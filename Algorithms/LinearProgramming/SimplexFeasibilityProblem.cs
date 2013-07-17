@@ -6,6 +6,8 @@ namespace Algorithms.LinearProgramming
     /// <summary>Класс для решения задачи поиска стартовой точки</summary>
     public class SimplexFeasibilityProblem
     {
+        private static readonly Random Rnd_ = new Random();
+
         /// <summary>Конструктор</summary>
         public SimplexFeasibilityProblem(Matrix A, Vector b)
         {
@@ -78,36 +80,34 @@ namespace Algorithms.LinearProgramming
             var c1 = new Vector(rowsNumber + columnsNumber); // целевой функционал. значения пропишем ниже
             var eq = new SimplexProblem(A1, b, c1);
             var result = SimplexResult.Success;
-            const double startHalfK = -1;
+            const int startHalfK = 8;
             var K = startHalfK;
             // TODO: Тут можно попробовать придумать способ найти более грамотные стартовые Ci
             // такие, что -sum (CiAik) < - L < 0. хотя не факт, что это поможет
             // из-за округления могут быть проблемы как с малыми K, так и с большими :(
-            for (var iter = 0; iter < 100; ++iter) //максимальное число итераций
+            while (K < 1000000)
             {
                 K *= 2;
                 for (var i = 0; i < A.Rows; ++i)
                 {
-                    c1[i + columnsNumber] = K;
+                    c1[i + columnsNumber] = -Rnd_.Next(K, K * 2);
                 }
                 double value;
                 result = eq.Solv(startIndicies, out x, out value, out basisIndices);
+                if (result == SimplexResult.Success && basisIndices.Any(t => t >= columnsNumber))
+                {
+                    result = SimplexResult.HullIsEmpty;
+                    continue; // остались небазисные переменные
+                }
                 if (result != SimplexResult.FunctionalUnbound)
                 {
-                    break;
+                    return result;
                 }
-                // unbound невозможен по смыслу задачи. он возможен только из-за ошибок вычислений.
-                // пытаемся его подавить, увеличив коэффициенты
+                // unbound тоже може может быть результатом ошибки округления. попробуем еще
             }
             if (result != SimplexResult.Success)
             {
                 return result == SimplexResult.FunctionalUnbound ? SimplexResult.RoundingError : result;
-            }
-            // может так оказаться, что в оптимальном решении вспомогательной задачи
-            // остались ненулевые вспомогательные переменные. Это означает, что исходная задача не имеет решения
-            if (basisIndices.Any(t => t >= columnsNumber))
-            {
-                return SimplexResult.HullIsEmpty;
             }
             return SimplexResult.Success;
         }

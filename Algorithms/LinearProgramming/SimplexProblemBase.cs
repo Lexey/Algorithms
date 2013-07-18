@@ -236,41 +236,44 @@ namespace Algorithms.LinearProgramming
                 }
                 // вводим новый столбец в базис
                 // ищем строку, в которой нужно заменить базисную переменную
-                var leadBasisRowIndex = FindLeadRow(newBasisColumn);
-                if (leadBasisRowIndex == -1)
+                var leadRowIndex = FindLeadRow(newBasisColumn);
+                if (leadRowIndex == -1)
                 {
                     return SimplexResult.FunctionalUnbound;
                 }
                 // обновляем списки небазисных столбцов и индексы базисных столбцов
                 freeColumns_.Remove(newBasisColumn);
-                freeColumns_.Add(Basis[leadBasisRowIndex - 1]);
-                Basis[leadBasisRowIndex - 1] = newBasisColumn;
+                freeColumns_.Add(Basis[leadRowIndex - 1]);
+                Basis[leadRowIndex - 1] = newBasisColumn;
 
-                var leadRow = table_[leadBasisRowIndex];
+                var leadRow = table_[leadRowIndex];
                 var leadValue = leadRow[newBasisColumn];
-                var leadR = r_[leadBasisRowIndex];
-                if (leadR != 0)
+                var leadR = r_[leadRowIndex];
+                if (leadValue != 1m)
                 {
-                    leadR /= leadValue;
-                    r_[leadBasisRowIndex] = leadR;
-                }
-                leadRow[newBasisColumn] = 1;
-
-                // для базисных столбцов считать бестолку. там заведомо нули в ведущей строке(кроме нового, но его мы потом
-                // пересчитаем отдельно)
-                Parallel.ForEach(freeColumns_, j =>
-                {
-                    var jValue = leadRow[j];
-                    if (jValue == 0)
+                    if (leadR != 0)
                     {
-                        return;
+                        leadR /= leadValue;
+                        r_[leadRowIndex] = leadR;
                     }
-                    jValue /= leadValue;
-                    leadRow[j] = jValue;
-                });
+                    leadRow[newBasisColumn] = 1;
+
+                    // для базисных столбцов считать бестолку. там заведомо нули в ведущей строке(кроме нового, но его мы потом
+                    // пересчитаем отдельно)
+                    Parallel.ForEach(freeColumns_, j =>
+                    {
+                        var jValue = leadRow[j];
+                        if (jValue == 0)
+                        {
+                            return;
+                        }
+                        jValue /= leadValue;
+                        leadRow[j] = jValue;
+                    });
+                }
                 Parallel.For(0, table_.Length, k =>
                 {
-                    if (k == leadBasisRowIndex)
+                    if (k == leadRowIndex)
                     {
                         return;
                     }
@@ -289,15 +292,17 @@ namespace Algorithms.LinearProgramming
                         }
                         currentRow[j] -= jValue * coeff;
                     }
-                    if (leadR != 0)
+                    if (leadR != 0 && k < A.Length + 1) // в "экстра M" нет смысла обновлять r
                     {
-                        r_[k] -= leadR * coeff;
-                        if (k > 0 && r_[k] < 0)
+                        var v = r_[k] - leadR * coeff;
+                        r_[k] = v;
+                        if (k > 0 && v < 0)
                         {
                             if (r_[k] < -Epsilon)
                             {
                                 Log_.WarnFormat("Rounding error. Got {0} as a new basis var value"
                                     , r_[k]);
+                                throw new InvalidOperationException();
                             }
                             r_[k] = 0;
                         }
@@ -353,28 +358,31 @@ namespace Algorithms.LinearProgramming
                     // перед базисной переменной в базисной строке не может быть нуля
                     throw new ArgumentException("Invalid start basis");
                 }
-                // делим всю строку и правую часть на значение перед базисной переменной
-                // то есть делаем 1 перед базисной переменной
                 var basisR = r_[basisRowIndex];
-                if (basisR != 0)
+                if (basisVarCoeffcient != 1m)
                 {
-                    basisR /= basisVarCoeffcient;
-                    r_[basisRowIndex] = basisR;
-                }
-                basisRow[basisColumnIndex] = 1;
-                // обрабатываем только значения в небазисных столбцах и необработанных базисных
-                // ибо в обработанных базисных уже нули
-                // вычитаем строку из остальных (по столбцу j)
-                Parallel.ForEach(freeColumns_, j =>
-                {
-                    var jValue = basisRow[j]; // значение в j-ом столбце базисной строки
-                    if (jValue == 0)
+                    // делим всю строку и правую часть на значение перед базисной переменной
+                    // то есть делаем 1 перед базисной переменной
+                    if (basisR != 0)
                     {
-                        return;
+                        basisR /= basisVarCoeffcient;
+                        r_[basisRowIndex] = basisR;
                     }
-                    jValue /= basisVarCoeffcient;
-                    basisRow[j] = jValue;
-                });
+                    basisRow[basisColumnIndex] = 1;
+                    // обрабатываем только значения в небазисных столбцах и необработанных базисных
+                    // ибо в обработанных базисных уже нули
+                    // вычитаем строку из остальных (по столбцу j)
+                    Parallel.ForEach(freeColumns_, j =>
+                    {
+                        var jValue = basisRow[j]; // значение в j-ом столбце базисной строки
+                        if (jValue == 0)
+                        {
+                            return;
+                        }
+                        jValue /= basisVarCoeffcient;
+                        basisRow[j] = jValue;
+                    });
+                }
                 Parallel.For(0, table_.Length, k =>
                 {
                     if (k == basisRowIndex)

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
 using System.Threading.Tasks;
-using Algorithms.DisjointSets;
 using Common.Logging;
 
 namespace Algorithms.LinearProgramming
@@ -366,6 +364,7 @@ namespace Algorithms.LinearProgramming
                 basisRow[basisColumnIndex] = 1;
                 // обрабатываем только значения в небазисных столбцах и необработанных базисных
                 // ибо в обработанных базисных уже нули
+                // вычитаем строку из остальных (по столбцу j)
                 Parallel.ForEach(freeColumns_, j =>
                 {
                     var jValue = basisRow[j]; // значение в j-ом столбце базисной строки
@@ -375,39 +374,36 @@ namespace Algorithms.LinearProgramming
                     }
                     jValue /= basisVarCoeffcient;
                     basisRow[j] = jValue;
-                    // вычитаем строку из остальных (по столбцу j)
-                    for (var k = 0; k < table_.Length; ++k)
-                    {
-                        if (k == basisRowIndex)
-                        {
-                            continue;
-                        }
-                        var currentRow = table_[k];
-                        var coeff = currentRow[basisColumnIndex]; // коэффициент, на который умножается вычитаемая базисная строка
-                        if (coeff == 0)
-                        {
-                            continue;
-                        }
-                        currentRow[j] -= jValue * coeff;
-                    }
                 });
-                // вычитаем значение правой части из остальных
-                Parallel.For(1, rowsNumber + 1, k =>
+                Parallel.For(0, table_.Length, k =>
                 {
                     if (k == basisRowIndex)
                     {
                         return;
                     }
                     var currentRow = table_[k];
-                    if (basisR != 0)
+                    var coeff = currentRow[basisColumnIndex];
+                        // коэффициент, на который умножается вычитаемая базисная строка
+                    if (coeff == 0)
                     {
-                        var coeff = currentRow[basisColumnIndex];
-                        if (coeff != 0)
-                        {
-                            r_[k] -= basisR * coeff;
-                        }
+                        return;
                     }
+                    foreach (var j in freeColumns_)
+                    {
+                        var jValue = basisRow[j]; // значение в j-ом столбце базисной строки
+                        if (jValue == 0)
+                        {
+                            continue;
+                        }
+                        currentRow[j] -= jValue * coeff;
+                    }
+                    ;
                     currentRow[basisColumnIndex] = 0;
+                    if (k == 0 || basisR == 0) // r[0] модифицировать смысла нет
+                    {
+                        return;
+                    }
+                    r_[k] -= basisR * coeff;
                 });
                 m0[basisColumnIndex] = 0;
             }

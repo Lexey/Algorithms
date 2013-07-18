@@ -1,5 +1,4 @@
 ﻿using System;
-using Algorithms;
 using Algorithms.LinearProgramming;
 using NUnit.Framework;
 

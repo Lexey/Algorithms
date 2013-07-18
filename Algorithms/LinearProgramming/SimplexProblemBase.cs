@@ -17,7 +17,7 @@ namespace Algorithms.LinearProgramming
         /// <summary>ГСЧ</summary>
         private static readonly Random Rnd_ = new Random();
         /// <summary>Логгер</summary>
-        private readonly static ILog Log_ = LogManager.GetCurrentClassLogger();
+        protected readonly static ILog Log_ = LogManager.GetCurrentClassLogger();
         /// <summary>Симплекс-таблица</summary>
         private decimal[][] table_;
         /// <summary>Правая часть для таблицы</summary>
@@ -123,7 +123,6 @@ namespace Algorithms.LinearProgramming
         /// <returns>Статус решения</returns>
         protected SimplexResult SolvImpl(int[] startBasis, decimal[] extraC)
         {
-            Log_.DebugFormat("Solving a problem of a size {0}x{1}", A.Length, c.Length);
             PrepareTableAndR(extraC);
             SetStartBasis(startBasis, true);
             return ContinueSolv();
@@ -165,6 +164,7 @@ namespace Algorithms.LinearProgramming
             var rowsNumber = A.Length;
             var columnsNumber = A[0].Length;
             var extendedColumnsNumber = columnsNumber + rowsNumber;
+            Log_.DebugFormat("Solving a feasibility problem of a size {0}x{1}", rowsNumber, extendedColumnsNumber);
             var startIndicies = new int[rowsNumber]; // стартовый базис
             var b1 = (decimal[])b.Clone();
             var a1 = new decimal[rowsNumber][];

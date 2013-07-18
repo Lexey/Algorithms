@@ -27,7 +27,6 @@ namespace Algorithms.LinearProgramming
             return SolvImpl(startBasis, null);
         }
 
-
         /// <summary>Решает задачу ЛП симплекс-методом</summary>
         public SimplexResult Solv()
         {
@@ -38,6 +37,7 @@ namespace Algorithms.LinearProgramming
                 return r;
             }
             //теперь решаем собственно задачу
+            Log_.DebugFormat("Proceeding with a problem of a size {0}x{1}", A.Length, c.Length);
             return ContinueSolv();
         }
     }

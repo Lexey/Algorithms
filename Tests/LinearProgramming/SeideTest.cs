@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using Algorithms;
 using Algorithms.LinearProgramming;
 using NUnit.Framework;
 
@@ -220,7 +218,7 @@ namespace Tests.LinearProgramming
 			};
 			var p = new double[] { 1, 1, 1, 1 };
 			var eq = CreateLP(points, p);
-			for (var t = 0; t < 150000; ++t)
+			for (var t = 0; t < 40000; ++t)
 			{
 				decimal result;
 				decimal[] opt; //финальный результат
@@ -244,7 +242,7 @@ namespace Tests.LinearProgramming
 			};
 			var p = new double[] { 1, 4, 2 };
 			var eq = CreateLP(points, p);
-			for (var t = 0; t < 150000; ++t)
+			for (var t = 0; t < 60000; ++t)
 			{
 				decimal result;
 				decimal[] opt; //финальный результат
@@ -283,7 +281,7 @@ namespace Tests.LinearProgramming
 			};
 			var p = new double[] { 6, 9, 1, 2, 8, 8, 9, 10, 11, 6 };
 			var eq = CreateLP(points, p);
-			for (var t = 0; t < 20000; ++t)
+			for (var t = 0; t < 10000; ++t)
 			{
 				decimal result;
 				decimal[] opt; //финальный результат

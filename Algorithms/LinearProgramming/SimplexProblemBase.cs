@@ -269,21 +269,6 @@ namespace Algorithms.LinearProgramming
                     }
                     jValue /= leadValue;
                     leadRow[j] = jValue;
-
-                    for (var k = 0; k < table_.Length; ++k)
-                    {
-                        if (k == leadBasisRowIndex)
-                        {
-                            continue;
-                        }
-                        var currentRow = table_[k];
-                        var coeff = currentRow[newBasisColumn];
-                        if (coeff == 0)
-                        {
-                            continue;
-                        }
-                        currentRow[j] -= jValue * coeff;
-                    }
                 });
                 Parallel.For(0, table_.Length, k =>
                 {
@@ -292,21 +277,31 @@ namespace Algorithms.LinearProgramming
                         return;
                     }
                     var currentRow = table_[k];
+                    var coeff = currentRow[newBasisColumn];
+                    if (coeff == 0)
+                    {
+                        return;
+                    }
+                    foreach (var j in freeColumns_)
+                    {
+                        var jValue = leadRow[j];
+                        if (jValue == 0)
+                        {
+                            continue;
+                        }
+                        currentRow[j] -= jValue * coeff;
+                    }
                     if (leadR != 0)
                     {
-                        var coeff = currentRow[newBasisColumn];
-                        if (coeff != 0)
+                        r_[k] -= leadR * coeff;
+                        if (k > 0 && r_[k] < 0)
                         {
-                            r_[k] -= leadR * coeff;
-                            if (k > 0 && r_[k] < 0)
+                            if (r_[k] < -Epsilon)
                             {
-                                if (r_[k] < -Epsilon)
-                                {
-                                    Log_.WarnFormat("Rounding error. Got {0} as a new basis var value"
-                                        , r_[k]);
-                                }
-                                r_[k] = 0;
+                                Log_.WarnFormat("Rounding error. Got {0} as a new basis var value"
+                                    , r_[k]);
                             }
+                            r_[k] = 0;
                         }
                     }
                     currentRow[newBasisColumn] = 0;

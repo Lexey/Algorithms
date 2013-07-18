@@ -53,6 +53,7 @@
     <Compile Include="LinearProgramming\SeideAlgorithm.cs" />
     <Compile Include="LinearProgramming\SimplexProblem.cs" />
     <Compile Include="LinearProgramming\SimplexFeasibilityProblem.cs" />
+    <Compile Include="LinearProgramming\SimplexProblemBase.cs" />
     <Compile Include="LinearProgramming\SimplexResult.cs" />
     <Compile Include="Matrix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

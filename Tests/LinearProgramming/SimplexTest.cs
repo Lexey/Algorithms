@@ -16,13 +16,12 @@ namespace Tests.LinearProgramming
 			var b = new [] { 1m };
             var c = new[] { 1m, 0 };
 			var eq = new SimplexProblem(A, b, c);
-			decimal[] x;
-            decimal val;
-			var res = eq.Solv(out x, out val);
-			Assert.AreEqual(res, SimplexResult.Success);
-			Assert.AreEqual(1, x[0]);
-			Assert.AreEqual(0, x[1]);
-            Assert.AreEqual(1, val);
+			var res = eq.Solv();
+			Assert.That(res, Is.EqualTo(SimplexResult.Success));
+		    var x = eq.Solution;
+			Assert.That(x[0], Is.EqualTo(1));
+            Assert.That(x[1], Is.EqualTo(0));
+            Assert.That(eq.Value, Is.EqualTo(1m));
         }
 
 		[Test]
@@ -33,13 +32,12 @@ namespace Tests.LinearProgramming
             var b = new[] { 1m };
             var c = new[] { 0m, 1 };
             var eq = new SimplexProblem(A, b, c);
-            decimal[] x;
-            decimal val;
-			var res = eq.Solv(out x, out val);
-			Assert.AreEqual(res, SimplexResult.Success);
-			Assert.AreEqual(1, x[1]);
-			Assert.AreEqual(0, x[0]);
-            Assert.AreEqual(1, val);
+			var res = eq.Solv();
+			Assert.That(res, Is.EqualTo(SimplexResult.Success));
+		    var x = eq.Solution;
+            Assert.That(x[0], Is.EqualTo(0));
+			Assert.That(x[1], Is.EqualTo(1));
+            Assert.That(eq.Value, Is.EqualTo(1m));
         }
 		
 		[Test]
@@ -50,13 +48,12 @@ namespace Tests.LinearProgramming
             var b = new[] { 1m };
             var c = new[] { 0m, -1 };
 			var eq = new SimplexProblem(A, b, c);
-            decimal[] x;
-            decimal val;
-			var res = eq.Solv(out x, out val);
-			Assert.AreEqual(res, SimplexResult.Success);
-			Assert.AreEqual(0, x[1]);
-			Assert.AreEqual(1, x[0]);
-            Assert.AreEqual(0, val);
+			var res = eq.Solv();
+            Assert.That(res, Is.EqualTo(SimplexResult.Success));
+            var x = eq.Solution;
+            Assert.That(x[0], Is.EqualTo(1));
+            Assert.That(x[1], Is.EqualTo(0));
+            Assert.That(eq.Value, Is.EqualTo(0m));
         }
 
 		[Test]
@@ -71,14 +68,13 @@ namespace Tests.LinearProgramming
             var b = new[] { 1m, 0 };
             var c = new[] { -1m, 0, 0 };
 			var eq = new SimplexProblem(A, b, c);
-            decimal[] x;
-            decimal val;
-			var res = eq.Solv(out x, out val);
-			Assert.AreEqual(res, SimplexResult.Success);
-			Assert.AreEqual(0, x[0]);
-			Assert.AreEqual(0, x[1]);
-			Assert.AreEqual(1, x[2]);
-            Assert.AreEqual(0, val);
+			var res = eq.Solv();
+            Assert.That(res, Is.EqualTo(SimplexResult.Success));
+            var x = eq.Solution;
+            Assert.That(x[0], Is.EqualTo(0));
+            Assert.That(x[1], Is.EqualTo(0));
+            Assert.That(x[2], Is.EqualTo(1));
+            Assert.That(eq.Value, Is.EqualTo(0m));
         }
 
 		[Test]
@@ -94,16 +90,15 @@ namespace Tests.LinearProgramming
             var b = new[] { 64m, 72, 20 };
             var c = new[] { 4m, 6, 0, 0, 0 };
 			var eq = new SimplexProblem(A, b, c);
-            decimal[] x;
-            decimal val;
-			var res = eq.Solv(out x, out val);
-			Assert.AreEqual(res, SimplexResult.Success);
-			Assert.AreEqual(24, x[0]);
-			Assert.AreEqual(16, x[1]);
-			Assert.AreEqual(0, x[2]);
-			Assert.AreEqual(0, x[3]);
-			Assert.AreEqual(4, x[4]);
-            Assert.AreEqual(192, val);
+			var res = eq.Solv();
+            Assert.That(res, Is.EqualTo(SimplexResult.Success));
+            var x = eq.Solution;
+            Assert.That(x[0], Is.EqualTo(24m));
+            Assert.That(x[1], Is.EqualTo(16m));
+            Assert.That(x[2], Is.EqualTo(0m));
+            Assert.That(x[3], Is.EqualTo(0m));
+            Assert.That(x[4], Is.EqualTo(4m));
+            Assert.That(eq.Value, Is.EqualTo(192m));
         }
 
 		[Test]
@@ -119,15 +114,14 @@ namespace Tests.LinearProgramming
             var b = new[] { 6m, 3, 4 };
             var c = new[] { 4m, 16, 0, 0 };
 			var eq = new SimplexProblem(A, b, c);
-            decimal[] x;
-            decimal val;
-			var res = eq.Solv(out x, out val);
-			Assert.AreEqual(res, SimplexResult.Success);
-			Assert.AreEqual(72.0/5, Math.Round(val, 2));
-			Assert.AreEqual(6.0 / 5, Math.Round(x[0], 2));
-			Assert.AreEqual(3.0 / 5, Math.Round(x[1], 2));
-			Assert.AreEqual(0, x[2]);
-			Assert.AreEqual(1, Math.Round(x[3], 2));
+			var res = eq.Solv();
+            Assert.That(res, Is.EqualTo(SimplexResult.Success));
+            var x = eq.Solution;
+            Assert.That(Math.Round(x[0], 2), Is.EqualTo(6m / 5m));
+            Assert.That(Math.Round(x[1], 2), Is.EqualTo(3m / 5m));
+            Assert.That(x[2], Is.EqualTo(0m));
+            Assert.That(Math.Round(x[3], 2), Is.EqualTo(1m));
+            Assert.That(Math.Round(eq.Value, 2), Is.EqualTo(72m / 5m));
 		}
 	}
 }

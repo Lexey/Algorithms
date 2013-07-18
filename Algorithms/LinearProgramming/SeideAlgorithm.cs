@@ -43,6 +43,7 @@ namespace Algorithms.LinearProgramming
 		{
             // инициализация результата
 			x = null;
+		    value = decimal.MinValue;
 		    var rowsNumber = A.Length;
 			var a = new decimal[rowsNumber][];
 			for (var i = 0; i < rowsNumber; ++i)
@@ -66,8 +67,7 @@ namespace Algorithms.LinearProgramming
 					// добавляем вспомогательные переменные, чтобы превратить неравенства в равенства
                     var eq = BuildSimplexProblem(currentState_);
                     Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Length, eq.c.Length);
-                    decimal[] x1;
-					var result = eq.Solv(out x1, out value);
+					var result = eq.Solv();
 					if (result != SimplexResult.Success)
 					{
 						while (result == SimplexResult.FunctionalUnbound)
@@ -88,7 +88,7 @@ namespace Algorithms.LinearProgramming
 							columns = currentState_.Columns;
 							eq = BuildSimplexProblem(currentState_);
                             Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Length, eq.c.Length);
-							result = eq.Solv(out x1, out value);
+							result = eq.Solv();
 						}
 						if (result != SimplexResult.Success)
 						{
@@ -109,9 +109,10 @@ namespace Algorithms.LinearProgramming
 					}
 					if (result == SimplexResult.Success)
 					{
+                        value = eq.Value;
 						// убираем лишние переменные
 						x = new decimal[columns];
-						Array.Copy(x1, x, columns);
+						Array.Copy(eq.Solution, x, columns);
 						// возвращаемся на уровень выше
 					}
 					while (states_.Count > 0)
@@ -134,7 +135,7 @@ namespace Algorithms.LinearProgramming
                                     val += removedRow[i] * x[i];
 								}
 							}
-							if (result != SimplexResult.Success || val - previousState.NewState.RemovedB > SimplexProblem.Epsilon)
+							if (result != SimplexResult.Success || val - previousState.NewState.RemovedB > SimplexProblemBase.Epsilon)
 							{
 								// ограничение нарушено
 								// удаляем одну из переменных из неравенств, превратив удаленное ранее неравенство в равенство
@@ -154,7 +155,7 @@ namespace Algorithms.LinearProgramming
 								var tempRow = new decimal[columns];
 								Array.Copy(removedRow, tempRow, columns);
 								removedRow = tempRow;
-                                if (maxValue < SimplexProblem.Epsilon)
+                                if (maxValue < SimplexProblemBase.Epsilon)
                                 {
                                     // тут возможны 3 варианта:
                                     // 1) result == Success. Значит правая часть < 0 и условие невыполнимо.

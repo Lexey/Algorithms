@@ -10,9 +10,11 @@ namespace Algorithms.LinearProgramming
     public class SimplexProblemBase
     {
         /// <summary>Точность вычислений</summary>
-        public const decimal Epsilon = 1E-18m;
+        public const decimal Epsilon = 1E-10m;
         /// <summary>Точность расчета значения функционала стартового приближения</summary>
-        public const decimal Epsilon2 = 1E-12m;
+        public const decimal EpsilonFunctional = 1E-6m;
+        /// <summary>Величина возможной ошибки в минус при расчете базисной переменной</summary>
+        public const decimal EpsilonBasis = 1E-6m;
 
         /// <summary>ГСЧ</summary>
         private static readonly Random Rnd_ = new Random();
@@ -230,7 +232,7 @@ namespace Algorithms.LinearProgramming
             {
                 // Ищем столбец с минимальным значением в m0
                 var newBasisColumn = FindMinColumn();
-                if (m0[newBasisColumn] >= -Epsilon2)
+                if (m0[newBasisColumn] >= -EpsilonFunctional)
                 {
                     break; //оптимум
                 }
@@ -298,13 +300,11 @@ namespace Algorithms.LinearProgramming
                         r_[k] = v;
                         if (k > 0 && v < 0)
                         {
-                            if (r_[k] < -Epsilon)
+                            if (r_[k] < -EpsilonBasis)
                             {
                                 Log_.WarnFormat("Rounding error. Got {0} as a new basis var value"
                                     , r_[k]);
-                                throw new InvalidOperationException();
                             }
-                            r_[k] = 0;
                         }
                     }
                     currentRow[newBasisColumn] = 0;
@@ -446,7 +446,7 @@ namespace Algorithms.LinearProgramming
             for (var i = 1; i < A.Length + 1; ++i)
             {
                 var v = table_[i][c];
-                if (v <= Epsilon)
+                if (v <= EpsilonFunctional)
                 {
                     continue;
                 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Common.Logging;
 
 namespace Algorithms.Annealing
 {
@@ -12,6 +13,16 @@ namespace Algorithms.Annealing
         private uint iterationToTemperatureDrop_;
 
         protected AnnealingPowerSeries()
+        {
+            Init();
+        }
+
+        protected AnnealingPowerSeries(ILog logger) : base(logger)
+        {
+            Init();
+        }
+
+        private void Init()
         {
             StartTemperature = 30;
             alpha_ = 0.98;
@@ -72,6 +83,8 @@ namespace Algorithms.Annealing
             {
                 currentTemperature_ *= alpha_;
                 iterationToTemperatureDrop_ = iterationsPerTemperatureStep_;
+                Log.DebugFormat("T = {0}, Value = {1}, Best = {2}"
+                    , currentTemperature_, Value, BestValue);
             }
             return currentTemperature_;
         }

@@ -6,12 +6,15 @@ namespace Algorithms.Annealing
     /// <summary>Базовый класс для оптимизационных алгоритмов на база отжига (simulated annealing)</summary>
     public abstract class AnnealingBase<T>
     {
-        protected static readonly ILog Logger = LogManager.GetCurrentClassLogger();
+        private ILog logger_;
         private double stopTemperature_;
 
         /// <summary>.ctor</summary>
-        protected AnnealingBase()
+        protected AnnealingBase() : this(LogManager.GetCurrentClassLogger()) {}
+        /// <summary>.ctor</summary>
+        protected AnnealingBase(ILog logger)
         {
+            Log = logger;
             Random = new Random();
             Value = double.MaxValue;
             stopTemperature_ = 0.5;
@@ -26,17 +29,29 @@ namespace Algorithms.Annealing
         public T BestPoint { get; private set; }
         /// <summary>Лучшее значение целевой функции</summary>
         public double BestValue { get; private set; }
-
+        /// <summary>Логгер</summary>
+        public ILog Log
+        {
+            get { return logger_; }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException();
+                }
+                logger_ = value;
+            }
+        }
         /// <summary>Ищет оптимум целевой функции</summary>
         /// <returns>true, если достигнут оптимум; иначе false</returns>
         public virtual bool Solve()
         {
             CurrentIteration = 0;
             BestPoint = CurrentPoint;
-            BestValue = Value;
+            BestValue = BestValue;
             if (Value <= OptimalValue)
             {
-                Logger.Debug("Initial value is already optimal");
+                Log.Debug("Initial value is already optimal");
                 return true;
             }
             double t;
@@ -49,10 +64,10 @@ namespace Algorithms.Annealing
                 var valueDelta = value - Value;
                 if (valueDelta <= 0)
                 {
-                    Logger.TraceFormat("New value {0} (old {1}). Doing shift", value, Value);
+                    Log.TraceFormat("New value {0} (old {1}). Doing shift", value, Value);
                     CurrentPoint = point;
                     Value = value;
-                    BestPoint = point;
+                    BestPoint = CurrentPoint;
                     BestValue = value;
                 }
                 else
@@ -64,13 +79,13 @@ namespace Algorithms.Annealing
                     }
                     if (p <= double.Epsilon)
                     {
-                        Logger.Trace("Probabilty is too low. Point is fixed");
+                        Log.Trace("Probabilty is too low. Point is fixed");
                         // сдвинуться в точку с большим значением уже нельзя, но есть еще шанс перепрыгнуть случайно в лучшее значение
                     }
                     else
                     {
                         var doShift = Random.NextDouble() <= p;
-                        Logger.Trace(f => f("Probabilty is {0}. {1} shift. New value {2} (old {3})"
+                        Log.Trace(f => f("Probabilty is {0}. {1} shift. New value {2} (old {3})"
                                             , p, doShift ? "Doing" : "Not doing", value, Value));
                         if (doShift)
                         {
@@ -81,11 +96,11 @@ namespace Algorithms.Annealing
                 }
                 if (CurrentIteration % 5000 == 0)
                 {
-                    Logger.DebugFormat("Done {0} iterations. Current value = {1}, t = {2}"
+                    Log.DebugFormat("Done {0} iterations. Current value = {1}, t = {2}"
                                        , CurrentIteration, Value, t);
                 }
             } while (Value > OptimalValue && t >= StopTemperature);
-            Logger.DebugFormat("Finished after {0} iterations. Final t: {1}, v = {2}"
+            Log.DebugFormat("Finished after {0} iterations. Final t: {1}, v = {2}"
                 , CurrentIteration, t, Value);
             return Value <= OptimalValue;
         }

@@ -48,7 +48,7 @@ namespace Algorithms.Annealing
         {
             CurrentIteration = 0;
             BestPoint = CurrentPoint;
-            BestValue = BestValue;
+            BestValue = Value;
             if (Value <= OptimalValue)
             {
                 Log.Debug("Initial value is already optimal");
@@ -67,8 +67,11 @@ namespace Algorithms.Annealing
                     Log.TraceFormat("New value {0} (old {1}). Doing shift", value, Value);
                     CurrentPoint = point;
                     Value = value;
-                    BestPoint = CurrentPoint;
-                    BestValue = value;
+                    if (value < BestValue)
+                    {
+                        BestPoint = CurrentPoint;
+                        BestValue = value;
+                    }
                 }
                 else
                 {

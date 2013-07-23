@@ -59,12 +59,12 @@ namespace Algorithms.Annealing
             {
                 ++CurrentIteration;
                 t = NextTemperature();
-                var point = NextPoint();
-                var value = CalcValue(point);
+                var value = GetNextValue();
                 var valueDelta = value - Value;
                 if (valueDelta <= 0)
                 {
                     Log.TraceFormat("New value {0} (old {1}). Doing shift", value, Value);
+                    var point = GetNextPoint();
                     CurrentPoint = point;
                     Value = value;
                     if (value < BestValue)
@@ -92,6 +92,7 @@ namespace Algorithms.Annealing
                                             , p, doShift ? "Doing" : "Not doing", value, Value));
                         if (doShift)
                         {
+                            var point = GetNextPoint();
                             CurrentPoint = point;
                             Value = value;
                         }
@@ -99,11 +100,11 @@ namespace Algorithms.Annealing
                 }
                 if (CurrentIteration % 5000 == 0)
                 {
-                    Log.DebugFormat("Done {0} iterations. Current value = {1}, t = {2}"
+                    Log.DebugFormat("Done {0} iterations. Current value = {1}, t = {2:e3}"
                                        , CurrentIteration, Value, t);
                 }
             } while (Value > OptimalValue && t >= StopTemperature);
-            Log.DebugFormat("Finished after {0} iterations. Final t: {1}, v = {2}"
+            Log.DebugFormat("Finished after {0} iterations. Final t: {1:e3}, v = {2}"
                 , CurrentIteration, t, Value);
             return Value <= OptimalValue;
         }
@@ -127,11 +128,11 @@ namespace Algorithms.Annealing
         /// <summary>Random number generator</summary>
         protected Random Random { get; private set; }
         /// <summary>Текущая итерация</summary>
-        protected int CurrentIteration { get; private set; }
-        /// <summary>Генерирует следующую точку</summary>
-        protected abstract T NextPoint();
-        /// <summary>Вычисляет значение целевой функции для точки</summary>
-        protected abstract double CalcValue(T point);
+        protected ulong CurrentIteration { get; private set; }
+        /// <summary>Расчет целевой функции в следующей точке</summary>
+        protected abstract double GetNextValue();
+        /// <summary>Получение следующей точки</summary>
+        protected abstract T GetNextPoint();
         /// <summary>Следующее значение "температуры"</summary>
         protected abstract double NextTemperature();
     }

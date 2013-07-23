@@ -6,6 +6,8 @@ namespace Tests.Annealing
 {
     public class QueensAnnealing : AnnealingPowerSeries<Point>
     {
+        private Point nextPoint_;
+
         /// <summary>.ctor</summary>
         /// <param name="size">Размер доски</param>
         public QueensAnnealing(ushort size)
@@ -27,7 +29,13 @@ namespace Tests.Annealing
  	        return base.Solve();
         }
 
-        protected override Point NextPoint()
+        protected override double GetNextValue()
+        {
+            MakeNextPoint();
+            return nextPoint_.Value;
+        }
+
+        private void MakeNextPoint()
         {
             // перестановка двух случайных столбцов
             // первый из которых должен иметь ненулевое число коллизий
@@ -38,14 +46,13 @@ namespace Tests.Annealing
                 i = (ushort)Random.Next(0, size);
             } while (!CurrentPoint.HasCollisions(i));
             var j = (ushort)((i + Random.Next(0, size - 1)) % size);
-            var p = new Point(CurrentPoint);
-            p.SwapColumns(i, j);
-            return p;
+            nextPoint_ = new Point(CurrentPoint);
+            nextPoint_.SwapColumns(i, j);
         }
 
-        protected override double CalcValue(Point point)
+        protected override Point GetNextPoint()
         {
-            return point.Value;
+            return nextPoint_;
         }
     }
 

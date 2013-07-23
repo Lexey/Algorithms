@@ -83,7 +83,7 @@ namespace Algorithms.Annealing
             {
                 currentTemperature_ *= alpha_;
                 iterationToTemperatureDrop_ = iterationsPerTemperatureStep_;
-                Log.DebugFormat("T = {0}, Value = {1}, Best = {2}"
+                Log.DebugFormat("T = {0:e3}, Value = {1}, Best = {2}"
                     , currentTemperature_, Value, BestValue);
             }
             return currentTemperature_;

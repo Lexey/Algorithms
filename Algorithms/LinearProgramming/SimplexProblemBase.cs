@@ -145,6 +145,13 @@ namespace Algorithms.LinearProgramming
             SetStartBasis(startBasis, true);
         }
 
+        /// <summary>Установка начального значения функционала</summary>
+        /// <param name="value">Начальное значение</param>
+        protected void SetValue(decimal value)
+        {
+            r_[0] = value;
+        }
+
         /// <summary>Копирует состояние из переданного решения задачи поиска допустимого базиса</summary>
         protected void CopyStateFromFeasibility(SimplexProblemBase src)
         {
@@ -249,7 +256,7 @@ namespace Algorithms.LinearProgramming
         /// <summary>Один шаг симплекс-метода</summary>
         /// <param name="result">Результат вычислений, если шаг оказался финальным</param>
         /// <returns>true - финальное состояние, false - можно оптимизировать дальше</returns>
-        private bool DoSingleStep(ref SimplexResult result)
+        protected bool DoSingleStep(ref SimplexResult result)
         {
 // Ищем столбец с минимальным значением в m0
             var newBasisColumn = FindEnteringColumn();

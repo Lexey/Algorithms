@@ -441,7 +441,7 @@ namespace Algorithms.LinearProgramming
         }
 
         /// <summary>Поиск отрицательного коэффициента в строке функционала</summary>
-        private int FindEnteringColumn()
+        protected int FindEnteringColumn()
         {
             var m0 = table_[0];
             for (var i = 0; i < m0.Length; ++i)

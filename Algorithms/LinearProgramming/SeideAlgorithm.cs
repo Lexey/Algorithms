@@ -68,7 +68,7 @@ namespace Algorithms.LinearProgramming
                     var eq = BuildSimplexProblem(currentState_);
                     Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Length, eq.c.Length);
 					var result = eq.Solv();
-					if (result != SimplexResult.Success)
+					if (result != SimplexResult.Optimal)
 					{
 						while (result == SimplexResult.FunctionalUnbound)
 						{
@@ -90,7 +90,7 @@ namespace Algorithms.LinearProgramming
                             Log_.DebugFormat("Solving subproblem of size {0}x{1}", eq.A.Length, eq.c.Length);
 							result = eq.Solv();
 						}
-						if (result != SimplexResult.Success)
+						if (result != SimplexResult.Optimal)
 						{
 							// если случился empty, то нужно возвращаться до состояния перед добавлением очередного ограничения
 							if (result != SimplexResult.HullIsEmpty)
@@ -107,7 +107,7 @@ namespace Algorithms.LinearProgramming
 							columns = currentState_.Columns;
 						}
 					}
-					if (result == SimplexResult.Success)
+					if (result == SimplexResult.Optimal)
 					{
                         value = eq.Value;
 						// убираем лишние переменные
@@ -128,14 +128,14 @@ namespace Algorithms.LinearProgramming
 							var removedRow = previousState.NewState.RemovedRow;
 							// проверяем, нарушает ли решение удаленное ограничение
 							var val = 0.0m;
-							if (result == SimplexResult.Success)
+							if (result == SimplexResult.Optimal)
 							{
 								for (var i = 0; i < columns; ++i)
 								{
                                     val += removedRow[i] * x[i];
 								}
 							}
-							if (result != SimplexResult.Success || val - previousState.NewState.RemovedB > SimplexProblemBase.Epsilon)
+							if (result != SimplexResult.Optimal || val - previousState.NewState.RemovedB > SimplexProblemBase.Epsilon)
 							{
 								// ограничение нарушено
 								// удаляем одну из переменных из неравенств, превратив удаленное ранее неравенство в равенство
@@ -166,7 +166,7 @@ namespace Algorithms.LinearProgramming
                                     // a) result == FunctionalUnbound нужно откручивать до предыдущего снятого ограничения
                                     // b) result == HullIsEmpty. Ошибкой уже не считается, т.к. мы уже сняли одно ограничение,
                                     // которое возможно ее вызвало. нужно вернуться на предыдущее снятое ограничение
-                                    result = result == SimplexResult.Success || previousState.NewState.RemovedB < 0
+                                    result = result == SimplexResult.Optimal || previousState.NewState.RemovedB < 0
                                             ? SimplexResult.HullIsEmpty : SimplexResult.FunctionalUnbound;
                                     RollbackStates(result == SimplexResult.HullIsEmpty);
                                     if (states_.Count == 0)
@@ -277,7 +277,7 @@ namespace Algorithms.LinearProgramming
 							        columns = currentState_.Columns;
 							        continue; // переход на открутку на предыдущий уровень
 							    }
-							    result = SimplexResult.Success;
+							    result = SimplexResult.Optimal;
 							    x = new decimal[1];
 							    x[0] = bLeadValue;
 							    value = bLeadValue != 0 ? currentState_.c[0] * bLeadValue : 0;

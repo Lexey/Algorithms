@@ -125,8 +125,7 @@ namespace Algorithms.LinearProgramming
         /// <returns>Статус решения</returns>
         protected SimplexResult SolvImpl(int[] startBasis, decimal[] extraC)
         {
-            PrepareTableAndR(extraC);
-            SetStartBasis(startBasis, true);
+            PrepareToSolv(startBasis, extraC);
             return ContinueSolv();
         }
 
@@ -135,6 +134,15 @@ namespace Algorithms.LinearProgramming
         {
             CalcFunctionalValue();
             return Optimize();
+        }
+
+        /// <summary>Установка стартовой таблицы и базиса</summary>
+        /// <param name="startBasis">Стартовый базис</param>
+        /// <param name="extraC">Дополнительный функционал, который будет помещен в последнюю строку таблицы</param>
+        protected void PrepareToSolv(int[] startBasis, decimal[] extraC)
+        {
+            PrepareTableAndR(extraC);
+            SetStartBasis(startBasis, true);
         }
 
         /// <summary>Копирует состояние из переданного решения задачи поиска допустимого базиса</summary>
@@ -189,7 +197,7 @@ namespace Algorithms.LinearProgramming
                 startIndicies[i] = j;
             }
             var c1 = new decimal[extendedColumnsNumber]; // целевой функционал. значения пропишем ниже
-            var result = SimplexResult.Success;
+            var result = SimplexResult.Optimal;
             const int startHalfK = 8;
             var K = startHalfK;
             // TODO: Тут можно попробовать придумать способ найти более грамотные стартовые Ci
@@ -204,7 +212,7 @@ namespace Algorithms.LinearProgramming
                 }
                 var eq = new SimplexProblem(a1, b1, c1);
                 result = eq.SolvImpl(startIndicies, c);
-                if (result == SimplexResult.Success)
+                if (result == SimplexResult.Optimal)
                 {
                     if (eq.Basis.Any(t => t >= columnsNumber))
                     {
@@ -212,7 +220,7 @@ namespace Algorithms.LinearProgramming
                         continue; // остались небазисные переменные
                     }
                     CopyStateFromFeasibility(eq);
-                    return SimplexResult.Success;
+                    return SimplexResult.Optimal;
                 }
                 if (result != SimplexResult.FunctionalUnbound)
                 {
@@ -226,92 +234,107 @@ namespace Algorithms.LinearProgramming
         /// <summary>Оптимизирует функционал</summary>
         private SimplexResult Optimize()
         {
-            var m0 = table_[0];
-            var iterationsLimit = A.Length * m0.Length; //лимит итераций для отсечения зацикливания
+            var r = SimplexResult.Inoptimal;
+            var iterationsLimit = A.Length * table_[0].Length; //лимит итераций для отсечения зацикливания
             while (--iterationsLimit >= 0)
             {
-                // Ищем столбец с минимальным значением в m0
-                var newBasisColumn = FindMinColumn();
-                if (m0[newBasisColumn] >= -EpsilonFunctional)
+                if (DoSingleStep(ref r))
                 {
-                    break; //оптимум
+                    return r;
                 }
-                // вводим новый столбец в базис
-                // ищем строку, в которой нужно заменить базисную переменную
-                var leadRowIndex = FindLeadRow(newBasisColumn);
-                if (leadRowIndex == -1)
-                {
-                    return SimplexResult.FunctionalUnbound;
-                }
-                // обновляем списки небазисных столбцов и индексы базисных столбцов
-                freeColumns_.Remove(newBasisColumn);
-                freeColumns_.Add(Basis[leadRowIndex - 1]);
-                Basis[leadRowIndex - 1] = newBasisColumn;
-
-                var leadRow = table_[leadRowIndex];
-                var leadValue = leadRow[newBasisColumn];
-                var leadR = r_[leadRowIndex];
-                if (leadValue != 1m)
-                {
-                    if (leadR != 0)
-                    {
-                        leadR /= leadValue;
-                        r_[leadRowIndex] = leadR;
-                    }
-                    leadRow[newBasisColumn] = 1;
-
-                    // для базисных столбцов считать бестолку. там заведомо нули в ведущей строке(кроме нового, но его мы потом
-                    // пересчитаем отдельно)
-                    Parallel.ForEach(freeColumns_, j =>
-                    {
-                        var jValue = leadRow[j];
-                        if (jValue == 0)
-                        {
-                            return;
-                        }
-                        jValue /= leadValue;
-                        leadRow[j] = jValue;
-                    });
-                }
-                Parallel.For(0, table_.Length, k =>
-                {
-                    if (k == leadRowIndex)
-                    {
-                        return;
-                    }
-                    var currentRow = table_[k];
-                    var coeff = currentRow[newBasisColumn];
-                    if (coeff == 0)
-                    {
-                        return;
-                    }
-                    foreach (var j in freeColumns_)
-                    {
-                        var jValue = leadRow[j];
-                        if (jValue == 0)
-                        {
-                            continue;
-                        }
-                        currentRow[j] -= jValue * coeff;
-                    }
-                    if (leadR != 0 && k < A.Length + 1) // в "экстра M" нет смысла обновлять r
-                    {
-                        var v = r_[k] - leadR * coeff;
-                        r_[k] = v;
-                        if (k > 0 && v < 0)
-                        {
-                            if (r_[k] < -EpsilonBasis)
-                            {
-                                Log_.WarnFormat("Rounding error. Got {0} as a new basis var value"
-                                    , r_[k]);
-                            }
-                        }
-                    }
-                    currentRow[newBasisColumn] = 0;
-                });
-
             }
-            return iterationsLimit >= 0 ? SimplexResult.Success : SimplexResult.CycleDetected;
+            return iterationsLimit >= 0 ? SimplexResult.Optimal : SimplexResult.CycleDetected;
+        }
+
+        /// <summary>Один шаг симплекс-метода</summary>
+        /// <param name="result">Результат вычислений, если шаг оказался финальным</param>
+        /// <returns>true - финальное состояние, false - можно оптимизировать дальше</returns>
+        private bool DoSingleStep(ref SimplexResult result)
+        {
+// Ищем столбец с минимальным значением в m0
+            var newBasisColumn = FindEnteringColumn();
+            if (newBasisColumn == -1)
+            {
+                //оптимум
+                result = SimplexResult.Optimal;
+                return true;
+            }
+            // вводим новый столбец в базис
+            // ищем строку, в которой нужно заменить базисную переменную
+            var leadRowIndex = FindLeavingRow(newBasisColumn);
+            if (leadRowIndex == -1)
+            {
+                // задача неограничена
+                result = SimplexResult.FunctionalUnbound;
+                return true;
+            }
+            // обновляем списки небазисных столбцов и индексы базисных столбцов
+            freeColumns_.Remove(newBasisColumn);
+            freeColumns_.Add(Basis[leadRowIndex - 1]);
+            Basis[leadRowIndex - 1] = newBasisColumn;
+
+            var leadRow = table_[leadRowIndex];
+            var leadValue = leadRow[newBasisColumn];
+            var leadR = r_[leadRowIndex];
+            if (leadValue != 1m)
+            {
+                if (leadR != 0)
+                {
+                    leadR /= leadValue;
+                    r_[leadRowIndex] = leadR;
+                }
+                leadRow[newBasisColumn] = 1;
+
+                // для базисных столбцов считать бестолку. там заведомо нули в ведущей строке(кроме нового, но его мы потом
+                // пересчитаем отдельно)
+                Parallel.ForEach(freeColumns_, j =>
+                {
+                    var jValue = leadRow[j];
+                    if (jValue == 0)
+                    {
+                        return;
+                    }
+                    jValue /= leadValue;
+                    leadRow[j] = jValue;
+                });
+            }
+            Parallel.For(0, table_.Length, k =>
+            {
+                if (k == leadRowIndex)
+                {
+                    return;
+                }
+                var currentRow = table_[k];
+                var coeff = currentRow[newBasisColumn];
+                if (coeff == 0)
+                {
+                    return;
+                }
+                foreach (var j in freeColumns_)
+                {
+                    var jValue = leadRow[j];
+                    if (jValue == 0)
+                    {
+                        continue;
+                    }
+                    currentRow[j] -= jValue * coeff;
+                }
+                if (leadR != 0 && k < A.Length + 1) // в "экстра M" нет смысла обновлять r
+                {
+                    var v = r_[k] - leadR * coeff;
+                    r_[k] = v;
+                    if (k > 0 && v < 0)
+                    {
+                        if (r_[k] < -EpsilonBasis)
+                        {
+                            Log_.WarnFormat("Rounding error. Got {0} as a new basis var value"
+                                , r_[k]);
+                        }
+                    }
+                }
+                currentRow[newBasisColumn] = 0;
+            });
+            return false;
         }
 
         /// <summary>Вычисляет исходное значение функционала и помещает его в r[0]</summary>
@@ -417,29 +440,25 @@ namespace Algorithms.LinearProgramming
             }
         }
 
-        /// <summary>Поиск минимального коэффициента в строке функционала</summary>
-        private int FindMinColumn()
+        /// <summary>Поиск отрицательного коэффициента в строке функционала</summary>
+        private int FindEnteringColumn()
         {
-            var ind = -1;
-            var min = Decimal.MaxValue;
             var m0 = table_[0];
             for (var i = 0; i < m0.Length; ++i)
             {
                 var test = m0[i];
-                if (test >= min)
+                if (test < -EpsilonFunctional)
                 {
-                    continue;
+                    return i;
                 }
-                min = test;
-                ind = i;
             }
-            return ind;
+            return -1;
         }
 
         /// <summary>Ищет ведущую строку</summary>
         /// <param name="c">Столбец</param>
         /// <returns>Индекс строки для исключения или -1, если нельзя исключить</returns>
-        private int FindLeadRow(int c)
+        private int FindLeavingRow(int c)
         {
             var ind = -1;
             var min = Decimal.MaxValue;

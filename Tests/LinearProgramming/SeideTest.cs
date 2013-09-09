@@ -10,7 +10,7 @@ namespace Tests.LinearProgramming
 		[Test]
 		public void Test01()
 		{
-			for (var i =0; i < 100000; ++i)
+			for (var i =0; i < 10000; ++i)
 			{
 				// x + y <= 1, x->max
                 var A = new[] { new[] { 1m, 1 } };
@@ -20,7 +20,7 @@ namespace Tests.LinearProgramming
 				decimal[] x;
 				decimal val;
 				var res = eq.Solv(out x, out val);
-				Assert.AreEqual(res, SimplexResult.Success);
+				Assert.AreEqual(res, SimplexResult.Optimal);
 				Assert.AreEqual(1m, x[0]);
 				Assert.AreEqual(0m, x[1]);
                 Assert.AreEqual(1m, val);
@@ -30,7 +30,7 @@ namespace Tests.LinearProgramming
 		[Test]
 		public void Test02()
 		{
-			for (var i =0; i < 100000; ++i)
+			for (var i =0; i < 10000; ++i)
 			{
 				// x + y <= 1, y->max
                 var A = new[] { new[] { 1m, 1 } };
@@ -40,7 +40,7 @@ namespace Tests.LinearProgramming
 				decimal[] x;
 				decimal val;
 				var res = eq.Solv(out x, out val);
-				Assert.AreEqual(res, SimplexResult.Success);
+				Assert.AreEqual(res, SimplexResult.Optimal);
 				Assert.AreEqual(1m, x[1]);
 				Assert.AreEqual(0m, x[0]);
                 Assert.AreEqual(1m, val);
@@ -50,7 +50,7 @@ namespace Tests.LinearProgramming
 		[Test]
 		public void Test03()
 		{
-			for (var i = 0; i < 100000; ++i)
+			for (var i = 0; i < 10000; ++i)
 			{
 				// x + y <= 1, -y->max
                 var A = new[] { new[] { 1m, 1 } };
@@ -60,7 +60,7 @@ namespace Tests.LinearProgramming
 				decimal[] x;
 				decimal val;
 				var res = eq.Solv(out x, out val);
-				Assert.AreEqual(res, SimplexResult.Success);
+				Assert.AreEqual(res, SimplexResult.Optimal);
 				Assert.AreEqual(0, x[1]);
 				Assert.AreEqual(1, x[0]);
                 Assert.AreEqual(0, val);
@@ -70,7 +70,7 @@ namespace Tests.LinearProgramming
 		[Test]
 		public void Test04()
 		{
-			for (var i = 0; i < 100000; ++i)
+			for (var i = 0; i < 10000; ++i)
 			{
 				//x+y+z<=1, x-y <= 0, -x-y->max
                 var A = new[]
@@ -84,7 +84,7 @@ namespace Tests.LinearProgramming
 				decimal[] x;
 				decimal val;
 				var res = eq.Solv(out x, out val);
-				Assert.AreEqual(res, SimplexResult.Success);
+				Assert.AreEqual(res, SimplexResult.Optimal);
 				Assert.AreEqual(0m, x[0]);
 				Assert.AreEqual(0m, x[1]);
 				Assert.AreEqual(1m, x[2]);
@@ -95,7 +95,7 @@ namespace Tests.LinearProgramming
 		[Test]
 		public void Test05()
 		{
-			for (var i = 0; i < 100000; ++i)
+			for (var i = 0; i < 10000; ++i)
 			{
 				// 2x1 + x2 <= 64, x1 + 3x2 <= 72, x2 <= 20, 4x1 + 6x2->max
                 var A = new[]
@@ -110,7 +110,7 @@ namespace Tests.LinearProgramming
 				decimal[] x;
 				decimal val;
 				var res = eq.Solv(out x, out val);
-				Assert.AreEqual(res, SimplexResult.Success);
+				Assert.AreEqual(res, SimplexResult.Optimal);
 				Assert.AreEqual(24m, x[0]);
 				Assert.AreEqual(16m, x[1]);
                 Assert.AreEqual(192m, val);
@@ -120,7 +120,7 @@ namespace Tests.LinearProgramming
 		[Test]
 		public void Test06()
 		{
-			for (var i = 0; i < 100000; ++i)
+			for (var i = 0; i < 10000; ++i)
 			{
 				//-3x1 - 4x2 <= -6, x1 + 3x2 - y <= 3, 2x1 + x2 <= 4, y <= 0 4x1 + 16x2->max
                 var A = new[]
@@ -136,7 +136,7 @@ namespace Tests.LinearProgramming
 				decimal[] x;
 				decimal val;
 				var res = eq.Solv(out x, out val);
-				Assert.AreEqual(SimplexResult.Success, res);
+				Assert.AreEqual(SimplexResult.Optimal, res);
 				Assert.AreEqual(6m / 5, Math.Round(x[0], 2));
 				Assert.AreEqual(3m / 5, Math.Round(x[1], 2));
 				Assert.AreEqual(0m, x[2]);
@@ -218,12 +218,12 @@ namespace Tests.LinearProgramming
 			};
 			var p = new double[] { 1, 1, 1, 1 };
 			var eq = CreateLP(points, p);
-			for (var t = 0; t < 40000; ++t)
+			for (var t = 0; t < 5000; ++t)
 			{
 				decimal result;
 				decimal[] opt; //финальный результат
 			    var rs = eq.Solv(out opt, out result);
-			    Assert.AreEqual(SimplexResult.Success, rs);
+			    Assert.AreEqual(SimplexResult.Optimal, rs);
 			    Assert.AreEqual(3.5m, Math.Round(-result, 6));
 			}
 		}
@@ -242,12 +242,12 @@ namespace Tests.LinearProgramming
 			};
 			var p = new double[] { 1, 4, 2 };
 			var eq = CreateLP(points, p);
-			for (var t = 0; t < 60000; ++t)
+			for (var t = 0; t < 5000; ++t)
 			{
 				decimal result;
 				decimal[] opt; //финальный результат
 			    var rs = eq.Solv(out opt, out result);
-				Assert.AreEqual(SimplexResult.Success, rs);
+				Assert.AreEqual(SimplexResult.Optimal, rs);
 				Assert.AreEqual(2.333333m, Math.Round(-result, 6));
 			}
 		}
@@ -281,12 +281,12 @@ namespace Tests.LinearProgramming
 			};
 			var p = new double[] { 6, 9, 1, 2, 8, 8, 9, 10, 11, 6 };
 			var eq = CreateLP(points, p);
-			for (var t = 0; t < 10000; ++t)
+			for (var t = 0; t < 5000; ++t)
 			{
 				decimal result;
 				decimal[] opt; //финальный результат
 			    var rs = eq.Solv(out opt, out result);
-				Assert.AreEqual(SimplexResult.Success, rs);
+				Assert.AreEqual(SimplexResult.Optimal, rs);
 				Assert.AreEqual(352018m, Math.Round(-result, 6));
 			}
 		}

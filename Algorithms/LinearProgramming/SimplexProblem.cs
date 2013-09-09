@@ -32,7 +32,7 @@ namespace Algorithms.LinearProgramming
         {
             // находим стартовую точку
             var r = SolvFeasibilityImpl();
-            if (r != SimplexResult.Success)
+            if (r != SimplexResult.Optimal)
             {
                 return r;
             }

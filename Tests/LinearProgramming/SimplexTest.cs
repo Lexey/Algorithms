@@ -16,7 +16,7 @@ namespace Tests.LinearProgramming
             var c = new[] { 1m, 0 };
 			var eq = new SimplexProblem(A, b, c);
 			var res = eq.Solv();
-			Assert.That(res, Is.EqualTo(SimplexResult.Success));
+			Assert.That(res, Is.EqualTo(SimplexResult.Optimal));
 		    var x = eq.Solution;
 			Assert.That(x[0], Is.EqualTo(1));
             Assert.That(x[1], Is.EqualTo(0));
@@ -32,7 +32,7 @@ namespace Tests.LinearProgramming
             var c = new[] { 0m, 1 };
             var eq = new SimplexProblem(A, b, c);
 			var res = eq.Solv();
-			Assert.That(res, Is.EqualTo(SimplexResult.Success));
+			Assert.That(res, Is.EqualTo(SimplexResult.Optimal));
 		    var x = eq.Solution;
             Assert.That(x[0], Is.EqualTo(0));
 			Assert.That(x[1], Is.EqualTo(1));
@@ -48,7 +48,7 @@ namespace Tests.LinearProgramming
             var c = new[] { 0m, -1 };
 			var eq = new SimplexProblem(A, b, c);
 			var res = eq.Solv();
-            Assert.That(res, Is.EqualTo(SimplexResult.Success));
+            Assert.That(res, Is.EqualTo(SimplexResult.Optimal));
             var x = eq.Solution;
             Assert.That(x[0], Is.EqualTo(1));
             Assert.That(x[1], Is.EqualTo(0));
@@ -68,7 +68,7 @@ namespace Tests.LinearProgramming
             var c = new[] { -1m, 0, 0 };
 			var eq = new SimplexProblem(A, b, c);
 			var res = eq.Solv();
-            Assert.That(res, Is.EqualTo(SimplexResult.Success));
+            Assert.That(res, Is.EqualTo(SimplexResult.Optimal));
             var x = eq.Solution;
             Assert.That(x[0], Is.EqualTo(0));
             Assert.That(x[1], Is.EqualTo(0));
@@ -90,7 +90,7 @@ namespace Tests.LinearProgramming
             var c = new[] { 4m, 6, 0, 0, 0 };
 			var eq = new SimplexProblem(A, b, c);
 			var res = eq.Solv();
-            Assert.That(res, Is.EqualTo(SimplexResult.Success));
+            Assert.That(res, Is.EqualTo(SimplexResult.Optimal));
             var x = eq.Solution;
             Assert.That(x[0], Is.EqualTo(24m));
             Assert.That(x[1], Is.EqualTo(16m));
@@ -114,7 +114,7 @@ namespace Tests.LinearProgramming
             var c = new[] { 4m, 16, 0, 0 };
 			var eq = new SimplexProblem(A, b, c);
 			var res = eq.Solv();
-            Assert.That(res, Is.EqualTo(SimplexResult.Success));
+            Assert.That(res, Is.EqualTo(SimplexResult.Optimal));
             var x = eq.Solution;
             Assert.That(Math.Round(x[0], 2), Is.EqualTo(6m / 5m));
             Assert.That(Math.Round(x[1], 2), Is.EqualTo(3m / 5m));

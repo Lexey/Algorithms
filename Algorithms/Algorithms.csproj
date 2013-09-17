@@ -54,6 +54,7 @@
     <Compile Include="Knapsack.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="LinearProgramming\PivotingRule.cs" />
     <Compile Include="LinearProgramming\SeideAlgorithm.cs" />
     <Compile Include="LinearProgramming\SimplexProblem.cs" />
     <Compile Include="LinearProgramming\SimplexFeasibilityProblem.cs" />

@@ -24,9 +24,36 @@ namespace Algorithms.LinearProgramming
         private decimal[][] table_;
         /// <summary>Правая часть для таблицы</summary>
         private decimal[] r_;
-
+        /// <summary>Правило выбора входящей переменной</summary>
+        private PivotingRule pivotingRule_;
+        /// <summary>Функция выбора входящей переменной</summary>
+        private Func<int> pivotingFunc_;
         /// <summary>Небазисные столбцы</summary>
         private HashSet<int> freeColumns_;
+
+        /// <summary>Правило выбора входящей переменной</summary>
+        public PivotingRule PivotingRule
+        {
+            get { return pivotingRule_; }
+            set
+            {
+                switch (value)
+                {
+                    case PivotingRule.MinCostCoefficent:
+                        pivotingFunc_ = FindEnteringColumnMinCost;
+                        break;
+                    case PivotingRule.Blands:
+                        pivotingFunc_ = FindEnteringColumnBlands;
+                        break;
+                    case PivotingRule.ReverseBlands:
+                        pivotingFunc_ = FindEnteringColumnReverseBlands;
+                        break;
+                    default:
+                        throw new ArgumentException("Invalid pivoting rule");
+                }
+                pivotingRule_ = value;
+            }
+        }
 
         /// <summary>Матрица системы уравнений Ax=b</summary>
         public decimal[][] A { get; private set; }
@@ -65,6 +92,7 @@ namespace Algorithms.LinearProgramming
             }
             this.A = A;
             this.b = b;
+            PivotingRule = PivotingRule.MinCostCoefficent;
         }
 
         /// <summary>Готовит таблицу для дальнейшей обработки</summary>
@@ -447,11 +475,56 @@ namespace Algorithms.LinearProgramming
             }
         }
 
-        /// <summary>Поиск отрицательного коэффициента в строке функционала</summary>
+        /// <summary>Поиск отрицательного коэффициента в строке функционала по одному из правил</summary>
         protected int FindEnteringColumn()
+        {
+            return pivotingFunc_();
+        }
+
+        /// <summary>Правило поиска входящей переменной по минимальному индексу</summary>
+        /// <returns></returns>
+        private int FindEnteringColumnMinCost()
+        {
+            var m0 = table_[0];
+            var min = decimal.MaxValue;
+            var minIndex = -1;
+            for (var i = 0; i < m0.Length; ++i)
+            {
+                var test = m0[i];
+                if (test < min)
+                {
+                    min = test;
+                    minIndex = i;
+                }
+            }
+            if (min >= -EpsilonFunctional)
+            {
+                return -1;
+            }
+            return minIndex;
+        }
+
+        /// <summary>Правило поиска входящей переменной по минимальному индексу</summary>
+        /// <returns></returns>
+        private int FindEnteringColumnBlands()
         {
             var m0 = table_[0];
             for (var i = 0; i < m0.Length; ++i)
+            {
+                var test = m0[i];
+                if (test < -EpsilonFunctional)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>Правило поиска входящей переменной по максимальному индексу</summary>
+        private int FindEnteringColumnReverseBlands()
+        {
+            var m0 = table_[0];
+            for (var i = m0.Length - 1; i >= 0; --i)
             {
                 var test = m0[i];
                 if (test < -EpsilonFunctional)

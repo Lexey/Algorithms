@@ -93,7 +93,7 @@ namespace Algorithms.LinearProgramming
 						if (result != SimplexResult.Optimal)
 						{
 							// если случился empty, то нужно возвращаться до состояния перед добавлением очередного ограничения
-							if (result != SimplexResult.HullIsEmpty)
+							if (result != SimplexResult.Infeasible)
 							{
                                 return result;
 							}
@@ -101,7 +101,7 @@ namespace Algorithms.LinearProgramming
 							if (states_.Count == 0)
 							{
                                 //увы, исходная задача неразрешима
-                                return SimplexResult.HullIsEmpty;
+                                return SimplexResult.Infeasible;
 							}
 							rows = currentState_.Rows;
 							columns = currentState_.Columns;
@@ -164,11 +164,11 @@ namespace Algorithms.LinearProgramming
                                     // нужно откручивать предыдущее закрепленное ограничение
                                     // 3) правая часть >= 0. условие выполняется автоматом,
                                     // a) result == FunctionalUnbound нужно откручивать до предыдущего снятого ограничения
-                                    // b) result == HullIsEmpty. Ошибкой уже не считается, т.к. мы уже сняли одно ограничение,
+                                    // b) result == Infeasible. Ошибкой уже не считается, т.к. мы уже сняли одно ограничение,
                                     // которое возможно ее вызвало. нужно вернуться на предыдущее снятое ограничение
                                     result = result == SimplexResult.Optimal || previousState.NewState.RemovedB < 0
-                                            ? SimplexResult.HullIsEmpty : SimplexResult.FunctionalUnbound;
-                                    RollbackStates(result == SimplexResult.HullIsEmpty);
+                                            ? SimplexResult.Infeasible : SimplexResult.FunctionalUnbound;
+                                    RollbackStates(result == SimplexResult.Infeasible);
                                     if (states_.Count == 0)
                                     {
                                         return result; // не судьба
@@ -270,7 +270,7 @@ namespace Algorithms.LinearProgramming
 							        RollbackStates(false);
 							        if (states_.Count == 0)
 							        {
-                                        return SimplexResult.HullIsEmpty; // не судьба
+                                        return SimplexResult.Infeasible; // не судьба
 							        }
 							        result = SimplexResult.FunctionalUnbound;
 							        rows = currentState_.Rows;

@@ -55,14 +55,32 @@ namespace Algorithms.LinearProgramming
             }
         }
 
-        /// <summary>Матрица системы уравнений Ax=b</summary>
+        /// <summary>Исходная матрица системы уравнений Ax=b</summary>
         public decimal[][] A { get; private set; }
+        /// <summary>Рабочая матрица системы уравнений Ax=b</summary>
+        private decimal[][] workingA_;
 
-        /// <summary>Правая часть системы Ax=b</summary>
+        /// <summary>Исходная правая часть системы Ax=b</summary>
         public decimal[] b { get; private set; }
+        /// <summary>Рабочая правая часть системы Ax=b</summary>
+        private decimal[] workingB_;
 
-        /// <summary>Вектор целевого функционала (c,x) -> max</summary>
-        protected decimal[] c { get; set; }
+
+        /// <summary>Исходный вектор целевого функционала (c,x) -> max</summary>
+        protected decimal[] c
+        {
+            get { return c_; }
+            set
+            {
+                c_ = value;
+                workingC_ = c;
+            }
+        }
+
+        /// <summary>Рабочий вектор целевого функционала (c,x) -> max</summary>
+        private decimal[] workingC_;
+        /// <summary>Исходный вектор целевого функционала (c,x) -> max</summary>
+        private decimal[] c_;
 
         /// <summary>Значение функционала</summary>
         public decimal Value { get { return r_[0]; }}
@@ -75,6 +93,11 @@ namespace Algorithms.LinearProgramming
                 var x = new decimal[c.Length];
                 for (var i = 0; i < Basis.Length; ++i)
                 {
+                    var index = Basis[i];
+                    if (index >= c.Length) // такое возможно при добавлении отсечений для ILP
+                    {
+                        continue;
+                    }
                     x[Basis[i]] = r_[i + 1];
                 }
                 return x;
@@ -91,7 +114,9 @@ namespace Algorithms.LinearProgramming
                 throw new ArgumentException("Dimensions of A and b are incompatible");
             }
             this.A = A;
+            workingA_ = A;
             this.b = b;
+            workingB_ = b;
             PivotingRule = PivotingRule.MinCostCoefficent;
         }
 
@@ -100,19 +125,19 @@ namespace Algorithms.LinearProgramming
         {
             // первая строка:    -cTrans
             // остальные строки:    A
-            var rowsNumber = A.Length;
-            var columnsNumber = c.Length;
+            var rowsNumber = workingA_.Length;
+            var columnsNumber = workingC_.Length;
             var extraRows = extraC != null ? 2 : 1;
             table_ = new decimal[rowsNumber + extraRows][];
             var m0 = new decimal[columnsNumber];
             table_[0] = m0;
             for (var i = 0; i < columnsNumber; ++i)
             {
-                m0[i] = -c[i];
+                m0[i] = -workingC_[i];
             }
             for (var i = 0; i < rowsNumber; ++i)
             {
-                table_[i + 1] = (decimal[])A[i].Clone() ;
+                table_[i + 1] = (decimal[])workingA_[i].Clone() ;
             }
             if (extraC != null)
             {
@@ -124,7 +149,7 @@ namespace Algorithms.LinearProgramming
                 }
             }
             r_ = new decimal[rowsNumber + extraRows];
-            Array.Copy(b, 0, r_, 1, rowsNumber);
+            Array.Copy(workingB_, 0, r_, 1, rowsNumber);
         }
 
         /// <summary>Устанавливает стартовый базис</summary>
@@ -132,7 +157,7 @@ namespace Algorithms.LinearProgramming
         /// <param name="identifyBasis">Нужно ли приводить базисные столбцы к единичной матрице</param>
         private void SetStartBasis(int[] startBasis, bool identifyBasis)
         {
-            if (startBasis.Distinct().Count() != A.Length)
+            if (startBasis.Distinct().Count() != workingA_.Length)
             {
                 throw new ArgumentException("Insufficient number of basis columns");
             }
@@ -143,7 +168,7 @@ namespace Algorithms.LinearProgramming
             }
             else
             {
-                freeColumns_ = new HashSet<int>(Enumerable.Range(0, c.Length).Except(Basis));
+                freeColumns_ = new HashSet<int>(Enumerable.Range(0, workingC_.Length).Except(Basis));
             }
         }
 
@@ -191,7 +216,7 @@ namespace Algorithms.LinearProgramming
             Array.Resize(ref table_, last); // выкидываем более ненужную строку
             for (var i = 0; i < last; ++i)
             {
-                Array.Resize(ref table_[i], c.Length);
+                Array.Resize(ref table_[i], workingC_.Length);
             }
             r_ = src.r_;
             Array.Resize(ref r_, last);
@@ -206,17 +231,17 @@ namespace Algorithms.LinearProgramming
             // то и данная имеет решение, причем ее решение дает точку, удовлетворяющую системе Ax=b и y = 0
             // если в правой части есть отрицательное число, то соответствующую доп. переменную нужно добавить со знаком минус
             // иначе будет косяк со стартовым базисом
-            var rowsNumber = A.Length;
-            var columnsNumber = A[0].Length;
+            var rowsNumber = workingA_.Length;
+            var columnsNumber = workingA_[0].Length;
             var extendedColumnsNumber = columnsNumber + rowsNumber;
             Log_.DebugFormat("Solving a feasibility problem of a size {0}x{1}", rowsNumber, extendedColumnsNumber);
             var startIndicies = new int[rowsNumber]; // стартовый базис
-            var b1 = (decimal[])b.Clone();
+            var b1 = (decimal[])workingB_.Clone();
             var a1 = new decimal[rowsNumber][];
             for (var i = 0; i < rowsNumber; ++i)
             {
                 var rowA1 = new decimal[extendedColumnsNumber];
-                Array.Copy(A[i], 0, rowA1, 0, columnsNumber);
+                Array.Copy(workingA_[i], 0, rowA1, 0, columnsNumber);
                 a1[i] = rowA1;
                 var j = columnsNumber + i;
                 if (b1[i] < 0)
@@ -241,17 +266,17 @@ namespace Algorithms.LinearProgramming
             while (K < 1000000)
             {
                 K *= 2;
-                for (var i = 0; i < A.Length; ++i)
+                for (var i = 0; i < workingA_.Length; ++i)
                 {
                     c1[i + columnsNumber] = -Rnd_.Next(K, K * 2);
                 }
                 var eq = new SimplexProblem(a1, b1, c1);
-                result = eq.SolvImpl(startIndicies, c);
+                result = eq.SolvImpl(startIndicies, workingC_);
                 if (result == SimplexResult.Optimal)
                 {
                     if (eq.Basis.Any(t => t >= columnsNumber))
                     {
-                        result = SimplexResult.HullIsEmpty;
+                        result = SimplexResult.Infeasible;
                         continue; // остались небазисные переменные
                     }
                     CopyStateFromFeasibility(eq);
@@ -270,7 +295,7 @@ namespace Algorithms.LinearProgramming
         private SimplexResult Optimize()
         {
             var r = SimplexResult.Inoptimal;
-            var iterationsLimit = A.Length * table_[0].Length; //лимит итераций для отсечения зацикливания
+            var iterationsLimit = workingA_.Length * table_[0].Length; //лимит итераций для отсечения зацикливания
             while (--iterationsLimit >= 0)
             {
                 if (DoSingleStep(ref r))
@@ -354,7 +379,7 @@ namespace Algorithms.LinearProgramming
                     }
                     currentRow[j] -= jValue * coeff;
                 }
-                if (leadR != 0 && k < A.Length + 1) // в "экстра M" нет смысла обновлять r
+                if (leadR != 0 && k < workingA_.Length + 1) // в "экстра M" нет смысла обновлять r
                 {
                     var v = r_[k] - leadR * coeff;
                     r_[k] = v;
@@ -373,7 +398,7 @@ namespace Algorithms.LinearProgramming
         }
 
         /// <summary>Вычисляет исходное значение функционала и помещает его в r[0]</summary>
-        private void CalcFunctionalValue()
+        protected void CalcFunctionalValue()
         {
             // считаем исходное значение функционала
             // в базисе все небазисные переменные - нули
@@ -387,9 +412,79 @@ namespace Algorithms.LinearProgramming
                     throw new ArgumentException("Supplied basis is not a valid basis");
                 }
                 var index = Basis[i];
-                val += c[index] * v; // подставляем базисные переменные в функционал
+                val += workingC_[index] * v; // подставляем базисные переменные в функционал
             }
             r_[0] = val;
+        }
+
+        /// <summary>Генерация отсечений Гомори для IPL</summary>
+        /// <returns>true - если есть новые отсечения, false - иначе</returns>
+        protected bool GenerateCuts()
+        {
+            var newR = new List<decimal>();
+            var newRows = new List<decimal[]>();
+            for (var i = 1; i < r_.Length; ++i)
+            {
+                if (Basis[i - 1] >= workingC_.Length) // вспомогательные переменные отсечений пофигу
+                {
+                    continue;
+                }
+                var ri = r_[i];
+                if (Math.Abs(ri - Math.Round(ri)) > Epsilon)
+                {
+                    newR.Add(Math.Floor(ri) - ri);
+                    var row = table_[i];
+                    var n = new decimal[row.Length];
+                    for (var j = 0; j < row.Length; ++j)
+                    {
+                        var v = row[j];
+                        n[j] = Math.Floor(v) - v;
+                    }
+                    newRows.Add(n);
+                }
+            }
+            var addon = newR.Count;
+            if (addon == 0)
+            {
+                return false;
+            }
+            var oldRowsCount = workingB_.Length;
+            if (ReferenceEquals(workingB_, b))
+            {
+                workingB_ = (decimal[])b.Clone();
+            }
+            Array.Resize(ref workingB_, oldRowsCount + addon);
+            if (ReferenceEquals(workingA_, A))
+            {
+                workingA_ = new decimal[oldRowsCount + addon][];
+                for (var i = 0; i < oldRowsCount; ++i)
+                {
+                    workingA_[i] = (decimal[])A[i].Clone();
+                }
+            }
+            else
+            {
+                Array.Resize(ref workingA_, oldRowsCount + addon);
+            }
+            var oldVarsCount = workingA_[0].Length;
+            for (var i = 0; i < oldRowsCount; ++i)
+            {
+                Array.Resize(ref workingA_[i], oldVarsCount + addon); // место под вспомогательные переменные
+            }
+            for (var i = 0; i < addon; ++i)
+            {
+                var r = newRows[i];
+                Array.Resize(ref r, oldVarsCount + addon);
+                r[oldVarsCount + i] = 1;
+                workingB_[i + oldRowsCount] = newR[i];
+                workingA_[i + oldRowsCount] = r;
+            }
+            if (ReferenceEquals(workingC_, c))
+            {
+                workingC_ = (decimal[])c.Clone();
+            }
+            Array.Resize(ref workingC_, oldVarsCount + addon);
+            return true;
         }
 
         /// <summary>Приводит базисные столбцы к единичной матрице</summary>
@@ -402,7 +497,7 @@ namespace Algorithms.LinearProgramming
             // перестраиваем симплекс-таблицу в исходное состояние:
             // приводим подматрицу при базисных компонентах к единичной
             //список еще неиспользованных строк
-            var rowsNumber = A.Length;
+            var rowsNumber = workingA_.Length;
             for (var i = 0; i < rowsNumber; ++i)
             {
                 var basisColumnIndex = Basis[i];
@@ -542,7 +637,7 @@ namespace Algorithms.LinearProgramming
         {
             var ind = -1;
             var min = Decimal.MaxValue;
-            for (var i = 1; i < A.Length + 1; ++i)
+            for (var i = 1; i < workingA_.Length + 1; ++i)
             {
                 var v = table_[i][c];
                 if (v <= EpsilonFunctional)

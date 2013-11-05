@@ -8,7 +8,7 @@
         /// <summary>Найден оптимум</summary>
         Optimal,
         /// <summary>Множество допустимых x пусто</summary>
-        HullIsEmpty,
+        Infeasible,
         /// <summary>Цикл из-за округления</summary>
         CycleDetected,
         /// <summary>Функционал неограничен сверху</summary>

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace Algorithms
 {
-	/// <summary>Реализации стандартных алгоритмов поиска в отсортированном списке</summary>
+    /// <summary>Реализации стандартных алгоритмов поиска в отсортированном списке</summary>
     public static class FindUtils
-	{
-		/// <summary>
+    {
+        /// <summary>
         /// Возвращает наименьшую позицию i из [0, end] в списке, такую, что list[i] >= val
         /// </summary>
         /// <typeparam name="T">Тип элемента. Должен реализовывать IComparable&lt;T&gt; или IComparable</typeparam>
@@ -18,20 +18,20 @@ namespace Algorithms
             return LowerBound(list, val, Comparer<T>.Default.Compare);
         }
 
-		/// <summary>
+        /// <summary>
         /// Возвращает наименьшую позицию i из [from, end] в списке, такую, что list[i] >= val
-		/// </summary>
-		/// <typeparam name="T">Тип элемента. Должен реализовывать IComparable&lt;T&gt; или IComparable</typeparam>
-		/// <param name="list">Отсортированный по возрастанию список элементов</param>
-		/// <param name="val">Значение для сравнения</param>
-		/// <param name="from">Начальный индекс массива</param>
-		/// <returns>Нижняя граница (не вкл) для данного значения (может быть list.Count)</returns>
-		public static int LowerBound<T>(this IList<T> list, T val, int from)
-		{
-			return list.LowerBound(val, from, list.Count, Comparer<T>.Default.Compare);
-		}
+        /// </summary>
+        /// <typeparam name="T">Тип элемента. Должен реализовывать IComparable&lt;T&gt; или IComparable</typeparam>
+        /// <param name="list">Отсортированный по возрастанию список элементов</param>
+        /// <param name="val">Значение для сравнения</param>
+        /// <param name="from">Начальный индекс массива</param>
+        /// <returns>Нижняя граница (не вкл) для данного значения (может быть list.Count)</returns>
+        public static int LowerBound<T>(this IList<T> list, T val, int from)
+        {
+            return list.LowerBound(val, from, list.Count, Comparer<T>.Default.Compare);
+        }
 
-		/// <summary>
+        /// <summary>
         /// Возвращает наименьшую позицию i из [0, end] в списке, такую, что list[i] >= val
         /// </summary>
         /// <typeparam name="T">Тип элемента</typeparam>

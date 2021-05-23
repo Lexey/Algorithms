@@ -1,5 +1,6 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using System;
+using System.Diagnostics;
 
 namespace Tests.Annealing
 {
@@ -18,6 +19,16 @@ namespace Tests.Annealing
                 ValidateSolution(n, a.CurrentPoint.Board);
                 n *= 2;
             }
+        }
+
+        [Test]
+        public void Test02()
+        {
+            var a = new QueensAnnealing(1000);
+            var sw = Stopwatch.StartNew();
+            Assert.IsTrue(a.Solve());
+            Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds} ms");
+            ValidateSolution(1000, a.CurrentPoint.Board);
         }
 
         private void ValidateSolution(int size, ushort[] r)

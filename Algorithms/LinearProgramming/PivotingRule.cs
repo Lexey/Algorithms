@@ -1,4 +1,5 @@
-﻿namespace Algorithms.LinearProgramming
+﻿
+namespace Algorithms.LinearProgramming
 {
     /// <summary>Правила выбора входящей переменной</summary>
     public enum PivotingRule

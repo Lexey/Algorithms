@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Common.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Common.Logging;
 
 namespace Algorithms.LinearProgramming
 {
@@ -19,7 +19,7 @@ namespace Algorithms.LinearProgramming
         /// <summary>ГСЧ</summary>
         private static readonly Random Rnd_ = new Random();
         /// <summary>Логгер</summary>
-        protected readonly static ILog Log_ = LogManager.GetCurrentClassLogger();
+        protected readonly static ILog Log_ = LogManager.GetLogger<SimplexProblemBase>();
         /// <summary>Симплекс-таблица</summary>
         private decimal[][] table_;
         /// <summary>Правая часть для таблицы</summary>
@@ -83,7 +83,7 @@ namespace Algorithms.LinearProgramming
         private decimal[] c_;
 
         /// <summary>Значение функционала</summary>
-        public decimal Value { get { return r_[0]; }}
+        public decimal Value { get { return r_[0]; } }
 
         /// <summary>Конечная точка</summary>
         public decimal[] Solution
@@ -137,7 +137,7 @@ namespace Algorithms.LinearProgramming
             }
             for (var i = 0; i < rowsNumber; ++i)
             {
-                table_[i + 1] = (decimal[])workingA_[i].Clone() ;
+                table_[i + 1] = (decimal[])workingA_[i].Clone();
             }
             if (extraC != null)
             {
@@ -311,7 +311,7 @@ namespace Algorithms.LinearProgramming
         /// <returns>true - финальное состояние, false - можно оптимизировать дальше</returns>
         protected bool DoSingleStep(ref SimplexResult result)
         {
-// Ищем столбец с минимальным значением в m0
+            // Ищем столбец с минимальным значением в m0
             var newBasisColumn = FindEnteringColumn();
             if (newBasisColumn == -1)
             {
@@ -544,7 +544,7 @@ namespace Algorithms.LinearProgramming
                     }
                     var currentRow = table_[k];
                     var coeff = currentRow[basisColumnIndex];
-                        // коэффициент, на который умножается вычитаемая базисная строка
+                    // коэффициент, на который умножается вычитаемая базисная строка
                     if (coeff == 0)
                     {
                         return;

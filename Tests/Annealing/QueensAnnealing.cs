@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Algorithms.Annealing;
+using System;
 using System.Linq;
-using Algorithms.Annealing;
 
 namespace Tests.Annealing
 {
@@ -26,7 +26,7 @@ namespace Tests.Annealing
         public override bool Solve()
         {
             Value = CurrentPoint.Value;
- 	        return base.Solve();
+            return base.Solve();
         }
 
         protected override double GetNextValue()
@@ -71,7 +71,7 @@ namespace Tests.Annealing
             {
                 sort[i] = Tuple.Create(i, (ushort)r.Next(0, ushort.MaxValue));
             }
-            Array.Sort(sort, (x,y) => x.Item2 - y.Item2);
+            Array.Sort(sort, (x, y) => x.Item2 - y.Item2);
             Board = sort.Select(x => x.Item1).ToArray();
             // считаем число ферзей на каждой из положительных диагоналей (r - c = k)
             // и отрицательных диагоналей (r + c = l)
@@ -140,7 +140,7 @@ namespace Tests.Annealing
         {
             // сначала вычитаем с исходных диагоналей
             var fromRow = Board[column];
-            var positiveAdjust = - column + size_ - 1;
+            var positiveAdjust = -column + size_ - 1;
             var positiveIndex = fromRow + positiveAdjust;
             var k = queensOnPositiveDiags_[positiveIndex];
             --k;

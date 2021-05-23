@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using Algorithms;
+﻿using Algorithms;
 using NUnit.Framework;
+using System.Collections.Generic;
 
 namespace Tests
 {

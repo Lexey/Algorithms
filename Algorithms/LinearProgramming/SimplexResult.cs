@@ -1,4 +1,5 @@
-﻿namespace Algorithms.LinearProgramming
+﻿
+namespace Algorithms.LinearProgramming
 {
     /// <summary>Результат работы симплекс-метода</summary>
     public enum SimplexResult

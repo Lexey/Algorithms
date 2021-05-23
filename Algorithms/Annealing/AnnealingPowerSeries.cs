@@ -1,5 +1,5 @@
-﻿using System;
-using Common.Logging;
+﻿using Common.Logging;
+using System;
 
 namespace Algorithms.Annealing
 {

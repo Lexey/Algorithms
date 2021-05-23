@@ -1,5 +1,5 @@
-﻿using System;
-using Common.Logging;
+﻿using Common.Logging;
+using System;
 
 namespace Algorithms.Annealing
 {
@@ -10,7 +10,7 @@ namespace Algorithms.Annealing
         private double stopTemperature_;
 
         /// <summary>.ctor</summary>
-        protected AnnealingBase() : this(LogManager.GetCurrentClassLogger()) {}
+        protected AnnealingBase() : this(LogManager.GetLogger<AnnealingBase<T>>()) {}
         /// <summary>.ctor</summary>
         protected AnnealingBase(ILog logger)
         {

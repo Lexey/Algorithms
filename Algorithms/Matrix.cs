@@ -4,51 +4,51 @@ using System.Linq;
 
 namespace Algorithms
 {
-	/// <summary>Вектор</summary>
-	public class Vector : Matrix
-	{
-		/// <summary>Конструктор вектора длины n</summary>
-		public Vector(int n) : base(1, n) {}
+    /// <summary>Вектор</summary>
+    public class Vector : Matrix
+    {
+        /// <summary>Конструктор вектора длины n</summary>
+        public Vector(int n) : base(1, n) { }
         /// <summary>Конструктор из списка значений</summary>
-        public Vector(IList<decimal> values) : base(new [] { values }) {}
+        public Vector(IList<decimal> values) : base(new[] { values }) { }
 
-		/// <summary>Индексер элементов вектора</summary>
+        /// <summary>Индексер элементов вектора</summary>
         public new decimal this[int i]
-		{
-			get { return base[0][i]; }
-			set { base[0][i] = value; }
-		}
+        {
+            get { return base[0][i]; }
+            set { base[0][i] = value; }
+        }
 
-		/// <summary>Конструктор из другого вектора</summary>
-		public Vector(Vector other) : base(other) {}
+        /// <summary>Конструктор из другого вектора</summary>
+        public Vector(Vector other) : base(other) { }
 
-		/// <summary>Полное клонирование вектора</summary>
-		public new Vector Clone()
-		{
-			return new Vector(this);
-		}
+        /// <summary>Полное клонирование вектора</summary>
+        public new Vector Clone()
+        {
+            return new Vector(this);
+        }
 
-		/// <summary>Число элементов</summary>
-		public int Count
-		{
-			get { return Columns; }
-		}
-	}
+        /// <summary>Число элементов</summary>
+        public int Count
+        {
+            get { return Columns; }
+        }
+    }
 
-	/// <summary>Матрица M x N</summary>
-	public class Matrix
-	{
-		/// <summary>Конструктор матрицы размерности m x n</summary>
-		/// <param name="m">Число строк</param>
-		/// <param name="n">Число столбцов</param>
-		public Matrix(int m, int n)
-		{
+    /// <summary>Матрица M x N</summary>
+    public class Matrix
+    {
+        /// <summary>Конструктор матрицы размерности m x n</summary>
+        /// <param name="m">Число строк</param>
+        /// <param name="n">Число столбцов</param>
+        public Matrix(int m, int n)
+        {
             Vals_ = new decimal[m][];
-			for (var i = 0; i < m; ++i)
-			{
+            for (var i = 0; i < m; ++i)
+            {
                 Vals_[i] = new decimal[n];
-			}
-		}
+            }
+        }
 
         /// <summary>Конструктор из значений</summary>
         public Matrix(IList<IList<decimal>> values)
@@ -71,87 +71,87 @@ namespace Algorithms
             }
         }
 
-		/// <summary>Конструктор копии матрицы</summary>
-		public Matrix(Matrix other)
-		{
+        /// <summary>Конструктор копии матрицы</summary>
+        public Matrix(Matrix other)
+        {
             Vals_ = new decimal[other.Vals_.Length][];
-			for (var i = 0; i < other.Vals_.Length; ++i)
-			{
+            for (var i = 0; i < other.Vals_.Length; ++i)
+            {
                 Vals_[i] = (decimal[])other.Vals_[i].Clone();
-			}
-		}
+            }
+        }
 
-		/// <summary>Полное клонирование матрицы</summary>
-		public Matrix Clone()
-		{
-			return new Matrix(this);
-		}
+        /// <summary>Полное клонирование матрицы</summary>
+        public Matrix Clone()
+        {
+            return new Matrix(this);
+        }
 
-		/// <summary>Индексер элементов матрицы</summary>
+        /// <summary>Индексер элементов матрицы</summary>
         public decimal[] this[int i]
-		{
-			get { return Vals_[i]; }
-		}
+        {
+            get { return Vals_[i]; }
+        }
 
         /// <summary>Посторочный вид</summary>
         public decimal[][] RowView
-	    {
-	        get { return Vals_; }
-	    }
+        {
+            get { return Vals_; }
+        }
 
         /// <summary>Поколоночный вид</summary>
         /// <remarks>По сути новая матрица. Поэтому медленно и нельзя через нее модифицировать</remarks>
         public decimal[][] ColumnView
-	    {
+        {
             get { return Transpose().RowView; }
-	    }
+        }
 
-	    /// <summary>Возвращает транспонированную матрицу</summary>
-		public Matrix Transpose()
-		{
-			var m = new Matrix(Vals_[0].Length, Vals_.Length);
-			for (var i = 0; i < Vals_.Length; ++i)
-			{
+        /// <summary>Возвращает транспонированную матрицу</summary>
+        public Matrix Transpose()
+        {
+            var m = new Matrix(Vals_[0].Length, Vals_.Length);
+            for (var i = 0; i < Vals_.Length; ++i)
+            {
                 for (var j = 0; j < Vals_[0].Length; ++j)
                 {
                     m[j][i] = Vals_[i][j];
                 }
-			}
-			return m;
-		}
+            }
+            return m;
+        }
 
-		/// <summary>Число строк</summary>
-		public int Rows
-		{
-			get { return Vals_.Length; }
-		}
+        /// <summary>Число строк</summary>
+        public int Rows
+        {
+            get { return Vals_.Length; }
+        }
 
-		/// <summary>Число колонок</summary>
-		public int Columns
-		{
-			get { return Vals_[0].Length; }
-		}
+        /// <summary>Число колонок</summary>
+        public int Columns
+        {
+            get { return Vals_[0].Length; }
+        }
 
-		#region Статические методы
-		/// <summary>Единичная матрица размера n</summary>
-		public static Matrix Identity(int n)
-		{
-			var m = new Matrix(n, n);
-			for (var i = 0; i < n; ++i)
-			{
+        #region Статические методы
+        /// <summary>Единичная матрица размера n</summary>
+        public static Matrix Identity(int n)
+        {
+            var m = new Matrix(n, n);
+            for (var i = 0; i < n; ++i)
+            {
                 m[i][i] = 1;
-			}
-			return m;
-		}
+            }
+            return m;
+        }
 
-		/// <summary>Нулевая матрица размера n</summary>
-		public static Matrix Zero(int n)
-		{
-			return new Matrix(n, n);
-		}
-		#endregion Статические методы
+        /// <summary>Нулевая матрица размера n</summary>
+        public static Matrix Zero(int n)
+        {
+            return new Matrix(n, n);
+        }
+        #endregion Статические методы
 
-		/// <summary>Значения матрицы</summary>
+        /// <summary>Значения матрицы</summary>
         protected decimal[][] Vals_;
-	}
+    }
 }

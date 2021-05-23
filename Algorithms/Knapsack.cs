@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Common.Logging;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Common.Logging;
 
 namespace Algorithms
 {
     /// <summary>Реализация укладки рюкзака через BnB</summary>
     public class Knapsack
     {
-        private readonly static ILog Log_ = LogManager.GetCurrentClassLogger();
+        private readonly static ILog Log_ = LogManager.GetLogger<Knapsack>();
 
         /// <summary>Список предметов</summary>
         private readonly Item[] items_;
@@ -98,7 +98,7 @@ namespace Algorithms
             var currentValue = 0u; // текущая стоимость
             var capacityLeft = capacity_;
             var taken = true; // признак взятия предмета
-            for (;;) // перебор всех предметов с отсечениями по максимальным оценкам остатков
+            for (; ; ) // перебор всех предметов с отсечениями по максимальным оценкам остатков
             {
                 var item = items_[currentItem];
                 long branchValue; // цена полной ветки перебора
@@ -228,7 +228,7 @@ namespace Algorithms
                     taken = s.Taken;
                     --currentItem;
                 }
-                if (!taken) 
+                if (!taken)
                 {
                     Log_.DebugFormat("Full branches: {0}, cache entries: {1}, cache hits: {2}, cache misses: {3}"
                         , fullBranches_, cache_.Count, cacheHits_, cacheMisses_);
